@@ -1,0 +1,51 @@
+<script src="http://code.jquery.com/jquery-2.1.4.min.js" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+
+<!-- This is where we display the table -->
+
+<p>
+  <label>Aggregazione</label>
+  <select id="aggregate">
+    <option value="tribunale">Tribunale</option>
+    <option value="area">Area</option>
+    <option value="dimensione" selected="selected">Dimensione</option>
+    <option value="null">Totale</option>
+  </select>
+</p>
+
+<p>
+  <input type="button" value="Show chart!" onclick="fetchData()"/>
+</p>
+
+<div id="table-location">
+  <script id="tabular-template" type="text/html">
+  <h2>Tabular Data</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <td>Aggregazioni</td>
+        \{{#each labels}} <td>\{{this}}</td> \{{/each }}
+      </tr>
+    </thead>
+    <tbody>
+      \{{#each datasets}}
+      <tr>
+        <td>\{{label}}</td>
+        \{{#each data}} <td>\{{this}}</td> \{{/each}}
+      </tr>
+      \{{/each}}
+    </tbody>
+  </table>
+  </script>
+</div>
+
+<br/>
+<!-- Location where the chart will be added -->
+<div id="chart-location" class="container">
+  <h2>Clearance Rate Demo -- 2013</h2>
+  <div>
+    <canvas id="FuelChart"></canvas>
+  </div>
+</div>
+
+<script src='test-chart.js'></script>
