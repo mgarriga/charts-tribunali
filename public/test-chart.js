@@ -3,8 +3,14 @@
 var templateString = $('#tabular-template').html()
 function fetchData(){
   var chartData;
+  var yearsArray = $('.parent input:checked').map(function () {
+    return this.name;
+  }).get();
+  console.log(yearsArray);
+  var yearsParam = {years: yearsArray}
   var aggregate = document.getElementById("aggregate").value
-  var urlString = 'http://localhost:3000/clearanceRateTest?criteria=' + aggregate
+  var urlString = 'http://localhost:3000/clearanceRateTest?criteria=' + aggregate +'&'+ $.param(yearsParam)
+  console.log(urlString)
   $(function(){
     $.ajax({
       url: urlString,

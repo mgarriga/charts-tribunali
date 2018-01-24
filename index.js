@@ -56,20 +56,33 @@ app.get('/charts',(request,response) =>{
 
 app.get("/clearanceRateTest", (req,res)=>{
 
+
   var criteria = '$'+req.query.criteria
 //  console.log(criteria)
-  getClearanceAvg(criteria,res)
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  console.log(years)
+  getClearanceAvg(criteria,years,res)
   //getClearanceRates(res)
 })
 
 
 // TODO: Move function to a script folder with each function doing what it knows
-function getClearanceAvg(criteria, res){
+function getClearanceAvg(criteria, years, res){
 
   db.collection("siecic").aggregate([
     {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
       $group:{
-          _id: criteria,
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
           avgClearance:{$avg:{$divide:["$definiti","$iscritti"]}}
       }
     },
@@ -89,7 +102,7 @@ function getClearanceAvg(criteria, res){
     var clearanceArray = []
     for (index in data){
          var doc = data[index]
-         var category = doc['_id']
+         var category = doc['_id'].aggregazione + ' -- ' + doc['_id'].anno
 
          //category == null is to group all records in a total, single aggregation
          if (category == null) category = 'Totale'
