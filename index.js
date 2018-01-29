@@ -56,16 +56,40 @@ app.get('/charts',(request,response) =>{
 
 app.get("/clearanceRateAverage", (req,res)=>{
 
+  var criteria = '$'+req.query.criteria
+//  console.log(criteria)
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getClearanceAvg(criteria,years,res).toArray(function (err, data){
+      if (err) {
+        console.log(err)
+        return
+      }
+      var result = formatClearance(data,"Average")
+      res.json(result)
+    })
+  //getClearanceRates(res)
+})
+
+app.get("/clearanceRateMode", (req,res)=>{
 
   var criteria = '$'+req.query.criteria
 //  console.log(criteria)
   var years = req.query.years.map(function(year){
     return parseInt(year)
   })
-  console.log(years)
-  getClearanceAvg(criteria,years,res)
+  getClearanceMode(criteria,years,res).toArray(function (err, data){
+      if (err) {
+        console.log(err)
+        return
+      }
+      var result = formatClearance(data,"Mode")
+      res.json(result)
+    })
   //getClearanceRates(res)
 })
+
 
 app.get("/clearanceRateMedian", (req,res)=>{
   var criteria = '$'+req.query.criteria
@@ -73,13 +97,50 @@ app.get("/clearanceRateMedian", (req,res)=>{
   var years = req.query.years.map(function(year){
     return parseInt(year)
   })
-  console.log(years)
-  getClearanceMedian(criteria,years,res)
+  getClearanceMedian(criteria,years,res).toArray(function (err,data){
+    if (err) {
+      console.log(err)
+      return
+    }
+    var result = formatClearance(data,"Median")
+    res.json(result)
+  })
   //getClearanceRates(res)
 })
 
+function formatClearance(data,title){
+  //category or "labels" array
+  var categoryArray = []
+
+  // values array
+  var clearanceArray = []
+  for (index in data){
+       var doc = data[index]
+       var category = doc['_id'].aggregazione
+       if (doc['_id'].aggregazione == null) category = 'Totale'
+       category = category + ' -- ' + doc['_id'].anno
+
+       var clearance = doc['clearance']
+       categoryArray.push(category)
+       clearanceArray.push(parseFloat(clearance.toPrecision(3)))
+    }
+  var datasets=[
+    {
+      'label':'Clearance ' + title,
+      'data':clearanceArray
+    }
+  ]
+
+  var response = {
+    "labels":categoryArray,
+    "datasets":datasets
+  }
+  return response
+//  console.log(JSON.stringify(response))
+}
+
 function getClearanceMedian(criteria, years, res){
-  db.collection("siecic").aggregate([
+  var result = db.collection("siecic").aggregate([
     {
       $match:{
         'anno':{$in:years},
@@ -160,7 +221,7 @@ function getClearanceMedian(criteria, years, res){
     {
       $project:{
         _id:1,
-        "medianClearance":{
+        "clearance":{
           "$avg":["$beginValue","$endValue"]
         }
       }
@@ -168,45 +229,14 @@ function getClearanceMedian(criteria, years, res){
     {
       $sort:{_id:1}
     }
-  ]).toArray(function (err, data){
-    if (err) {
-      console.log(err)
-      return
-    }
-    //category or "labels" array
-    var categoryArray = []
-
-    // values array
-    var clearanceArray = []
-    for (index in data){
-         var doc = data[index]
-         var category = doc['_id'].aggregazione
-         if (doc['_id'].aggregazione == null) category = 'Totale'
-         category = category + ' -- ' + doc['_id'].anno
-         var clearance = doc['medianClearance']
-         categoryArray.push(category)
-         clearanceArray.push(parseFloat(clearance.toPrecision(3)))
-      }
-    var datasets=[
-      {
-        'label':'Clearance Median',
-        'data':clearanceArray
-      }
-    ]
-
-    var response = {
-      "labels":categoryArray,
-      "datasets":datasets
-    }
-  //  console.log(JSON.stringify(response))
-    res.json(response)
-  })
+  ])
+  return result
 }
 
 // TODO: Move function to a script folder with each function doing what it knows
 function getClearanceAvg(criteria, years, res){
 
-  db.collection("siecic").aggregate([
+  result = db.collection("siecic").aggregate([
     {
       $match:{
         'anno':{$in:years}
@@ -218,45 +248,12 @@ function getClearanceAvg(criteria, years, res){
             'aggregazione':criteria,
             'anno':'$anno'
           },
-          avgClearance:{$avg:{$divide:["$definiti","$iscritti"]}}
+          clearance:{$avg:{$divide:["$definiti","$iscritti"]}}
       }
     },
     {
       $sort:{_id:1}
     }
-  ]).toArray(function (err, data){
-    if (err) {
-      console.log(err)
-      return
-    }
-
-    //category or "labels" array
-    var categoryArray = []
-
-    // values array
-    var clearanceArray = []
-    for (index in data){
-         var doc = data[index]
-         var category = doc['_id'].aggregazione
-         if (doc['_id'].aggregazione == null) category = 'Totale'
-         category = category + ' -- ' + doc['_id'].anno
-         //category == null is to group all records in a total, single aggregation
-         var clearance = doc['avgClearance']
-         categoryArray.push(category)
-         clearanceArray.push(parseFloat(clearance.toPrecision(3)))
-      }
-    var datasets=[
-      {
-        'label':'Clearance Average',
-        'data':clearanceArray
-      }
-    ]
-
-    var response = {
-      "labels":categoryArray,
-      "datasets":datasets
-    }
-  //  console.log(JSON.stringify(response))
-    res.json(response)
-  })
+  ])
+  return result
 }
