@@ -67,6 +67,142 @@ app.get("/clearanceRateTest", (req,res)=>{
   //getClearanceRates(res)
 })
 
+app.get("/clearanceRateMedian", (req,res)=>{
+  var criteria = '$'+req.query.criteria
+//  console.log(criteria)
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  console.log(years)
+  getClearanceMedian(criteria,years,res)
+  //getClearanceRates(res)
+})
+
+function getClearanceMedian(criteria, years, res){
+  db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        simpleClearance:{
+          $push:{$divide:["$definiti","$iscritti"]}
+        }
+      }
+    },
+    {
+      "$unwind":"$simpleClearance"
+    },
+    {
+      "$sort":{
+        simpleClearance:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "simpleClearance":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "simpleClearance":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        simpleClearance:{
+          $push:"$simpleClearance"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        //simpleClearance:1,
+        "beginValue":{
+          "$arrayElemAt":["$simpleClearance","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$simpleClearance","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "medianClearance":{
+          "$avg":["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ]).toArray(function (err, data){
+    if (err) {
+      console.log(err)
+      return
+    }
+    //category or "labels" array
+    var categoryArray = []
+
+    // values array
+    var clearanceArray = []
+    for (index in data){
+         var doc = data[index]
+         var category = doc['_id'].aggregazione + ' -- ' + doc['_id'].anno
+
+         //category == null is to group all records in a total, single aggregation
+         if (category == null) category = 'Totale'
+         var clearance = doc['medianClearance']
+         categoryArray.push(category)
+         clearanceArray.push(parseFloat(clearance.toPrecision(3)))
+      }
+    var datasets=[
+      {
+        'label':'Clearance Median',
+        'data':clearanceArray
+      }
+    ]
+
+    var response = {
+      "labels":categoryArray,
+      "datasets":datasets
+    }
+  //  console.log(JSON.stringify(response))
+    res.json(response)
+  })
+}
 
 // TODO: Move function to a script folder with each function doing what it knows
 function getClearanceAvg(criteria, years, res){

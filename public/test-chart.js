@@ -1,6 +1,7 @@
 //const Chart = require('charts.js')
 
 var templateString = $('#tabular-template').html()
+
 function fetchData(){
   var chartData;
   var yearsArray = $('.parent input:checked').map(function () {
@@ -10,6 +11,37 @@ function fetchData(){
   var yearsParam = {years: yearsArray}
   var aggregate = document.getElementById("aggregate").value
   var urlString = 'http://localhost:3000/clearanceRateTest?criteria=' + aggregate +'&'+ $.param(yearsParam)
+  console.log(urlString)
+  $(function(){
+    $.ajax({
+      url: urlString,
+      type: 'GET',
+      dataType:'json',
+      success: function(data){
+        chartData = data
+        //console.log("hola" + JSON.stringify(data))
+        //console.log($("#tabular-template").html())
+        var template = Handlebars.compile(templateString)
+        $("#table-location").html(template(data))
+        drawChart(data)
+      },
+      error: function(xhr,status){
+        console.log(xhr)
+        console.log(status)
+      }
+    })
+  })
+}
+
+function fetchDataMedian(){
+  var chartData;
+  var yearsArray = $('.parent input:checked').map(function () {
+    return this.name;
+  }).get();
+  console.log(yearsArray);
+  var yearsParam = {years: yearsArray}
+  var aggregate = document.getElementById("aggregate").value
+  var urlString = 'http://localhost:3000/clearanceRateMedian?criteria=' + aggregate +'&'+ $.param(yearsParam)
   console.log(urlString)
   $(function(){
     $.ajax({
