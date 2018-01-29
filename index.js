@@ -54,7 +54,7 @@ app.get('/charts',(request,response) =>{
   //})
 })
 
-app.get("/clearanceRateTest", (req,res)=>{
+app.get("/clearanceRateAverage", (req,res)=>{
 
 
   var criteria = '$'+req.query.criteria
@@ -180,10 +180,9 @@ function getClearanceMedian(criteria, years, res){
     var clearanceArray = []
     for (index in data){
          var doc = data[index]
-         var category = doc['_id'].aggregazione + ' -- ' + doc['_id'].anno
-
-         //category == null is to group all records in a total, single aggregation
-         if (category == null) category = 'Totale'
+         var category = doc['_id'].aggregazione
+         if (doc['_id'].aggregazione == null) category = 'Totale'
+         category = category + ' -- ' + doc['_id'].anno
          var clearance = doc['medianClearance']
          categoryArray.push(category)
          clearanceArray.push(parseFloat(clearance.toPrecision(3)))
@@ -238,10 +237,10 @@ function getClearanceAvg(criteria, years, res){
     var clearanceArray = []
     for (index in data){
          var doc = data[index]
-         var category = doc['_id'].aggregazione + ' -- ' + doc['_id'].anno
-
+         var category = doc['_id'].aggregazione
+         if (doc['_id'].aggregazione == null) category = 'Totale'
+         category = category + ' -- ' + doc['_id'].anno
          //category == null is to group all records in a total, single aggregation
-         if (category == null) category = 'Totale'
          var clearance = doc['avgClearance']
          categoryArray.push(category)
          clearanceArray.push(parseFloat(clearance.toPrecision(3)))

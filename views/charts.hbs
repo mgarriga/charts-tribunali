@@ -20,11 +20,11 @@
 </div>
 
 <p>
-  <input type="button" value="Show chart!" onclick="fetchData()"/>
+  <input type="button" value="Show chart!" onclick="fetchData('Average')"/>
 </p>
 
 <p>
-  <input type="button" value="Show Median!" onclick="fetchDataMedian()"/>
+  <input type="button" value="Show Median!" onclick="fetchData('Median')"/>
 </p>
 
 <div id="table-location">
@@ -52,9 +52,9 @@
 <br/>
 <!-- Location where the chart will be added -->
 <div id="chart-location" class="container">
-  <h2>Clearance Rate Demo -- 2013</h2>
+  <h2 id="chartHeader">Clearance Rate Demo</h2>
   <div>
-    <canvas id="FuelChart"></canvas>
+    <canvas id="ClearanceChart"></canvas>
   </div>
 </div>
 

@@ -2,15 +2,18 @@
 
 var templateString = $('#tabular-template').html()
 
-function fetchData(){
+function fetchData(metric){
+  console.log(metric)
+  console.log('Hello From fetchData()')
   var chartData;
   var yearsArray = $('.parent input:checked').map(function () {
     return this.name;
   }).get();
-  console.log(yearsArray);
   var yearsParam = {years: yearsArray}
   var aggregate = document.getElementById("aggregate").value
-  var urlString = 'http://localhost:3000/clearanceRateTest?criteria=' + aggregate +'&'+ $.param(yearsParam)
+  if (aggregate == 'null') aggregate = "totale"
+  var title = "Simple Clearance Rate for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
+  var urlString = 'http://localhost:3000/clearanceRate'+ metric + '?criteria=' + aggregate +'&'+ $.param(yearsParam)
   console.log(urlString)
   $(function(){
     $.ajax({
@@ -23,38 +26,7 @@ function fetchData(){
         //console.log($("#tabular-template").html())
         var template = Handlebars.compile(templateString)
         $("#table-location").html(template(data))
-        drawChart(data)
-      },
-      error: function(xhr,status){
-        console.log(xhr)
-        console.log(status)
-      }
-    })
-  })
-}
-
-function fetchDataMedian(){
-  var chartData;
-  var yearsArray = $('.parent input:checked').map(function () {
-    return this.name;
-  }).get();
-  console.log(yearsArray);
-  var yearsParam = {years: yearsArray}
-  var aggregate = document.getElementById("aggregate").value
-  var urlString = 'http://localhost:3000/clearanceRateMedian?criteria=' + aggregate +'&'+ $.param(yearsParam)
-  console.log(urlString)
-  $(function(){
-    $.ajax({
-      url: urlString,
-      type: 'GET',
-      dataType:'json',
-      success: function(data){
-        chartData = data
-        //console.log("hola" + JSON.stringify(data))
-        //console.log($("#tabular-template").html())
-        var template = Handlebars.compile(templateString)
-        $("#table-location").html(template(data))
-        drawChart(data)
+        drawChart(data,title)
       },
       error: function(xhr,status){
         console.log(xhr)
@@ -71,12 +43,18 @@ function destroyChart(){
   })
 }
 
-function drawChart(rawData){
-  var ctx = document.getElementById("FuelChart").getContext('2d')
+function drawChart(rawData, title){
+  var ctx = document.getElementById("ClearanceChart").getContext('2d')
   destroyChart()
   var fuelChart = new Chart(ctx,{
     type: 'bar',
-    data: rawData
+    data: rawData,
+    options:{
+      title:{
+        display:true,
+        text: title
+      }
+    }
   })
 }
 
@@ -89,22 +67,8 @@ Chart.defaults.global.legend.onClick = function(e, legendItem) {
   update_caption(legendItem)
   original.call(this, e, legendItem);
 };
-
-// Sample chart
-var myChart = new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ["M", "T", "W", "R", "F", "S", "S"],
-    datasets: [{
-      label: 'apples',
-      data: [12, 19, 3, 17, 28, 24, 7]
-    }, {
-      label: 'oranges',
-      data: [30, 29, 5, 5, 20, 3, 10]
-    }]
-  }
-});
 */
+
 
 
 // Example -- Dynamic change of chart legends (metadata)
@@ -129,6 +93,22 @@ console.log(caption)
 };
 */
 
+/*
+// Sample chart
+var myChart = new Chart(ctx, {
+type: 'bar',
+data: {
+labels: ["M", "T", "W", "R", "F", "S", "S"],
+datasets: [{
+label: 'apples',
+data: [12, 19, 3, 17, 28, 24, 7]
+}, {
+label: 'oranges',
+data: [30, 29, 5, 5, 20, 3, 10]
+}]
+}
+});
+*/
 
 /*
 var ctx = document.getElementById("myChart2").getContext('2d');
