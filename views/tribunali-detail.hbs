@@ -1,7 +1,22 @@
 <script src="http://code.jquery.com/jquery-2.1.4.min.js" charset="utf-8"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 
-<!-- This is where we display the table -->
+
+<div id="tribunali-location">
+  <script id="tribunali-fill" type="text/x-handlebars-template">
+    <div class="entry">
+      <h1>Tribunale</h1>
+
+      <select id="tribunali">
+        \{{#each tribunali}}
+          <option value= "\{{this}}">\{{this}}</option>
+        \{{/each }}
+      </select>
+
+    </div>
+  </script>
+
+</div>
 
 <p>
   <label>Aggregazione</label>
@@ -20,7 +35,7 @@
 </div>
 
 <p>
-  <input type="button" value="Show chart!" onclick="fetchData('Average')"/>
+  <input type="button" value="Show Mean!" onclick="fetchData('Average')"/>
 </p>
 
 <p>
@@ -62,4 +77,4 @@
   </div>
 </div>
 
-<script src='test-chart.js'></script>
+<script src='tribunali-detail-scripts.js'></script>
