@@ -35,6 +35,7 @@ router.get("/clearanceRateMode", (req,res)=>{
         console.log(err)
         return
       }
+      //console.log(JSON.stringify(data))
       var result = cr.formatClearance(data,"Mode")
       res.json(result)
     })

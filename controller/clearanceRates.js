@@ -1,3 +1,5 @@
+var round =  require('mongo-round')
+
 function formatClearance(data,title){
   //category or "labels" array
   var categoryArray = []
@@ -164,16 +166,103 @@ function getClearanceMode(criteria, years, res){
     },
     {
       $group:{
-          _id:{
-            'aggregazione':criteria,
-            'anno':'$anno'
-          },
-          clearance:{$avg:{$divide:["$definiti","$iscritti"]}}
+        _id:{
+          'agg':criteria,
+          'ann':'$anno',
+          cle:round({$avg:{$divide:["$definiti","$iscritti"]}},2),
+        },
+        count:{
+            $sum: 1
+        }
       }
     },
     {
-      $sort:{_id:1}
+      $group:{
+        _id:{
+          aggregazione:'$_id.agg',
+          'anno':'$_id.ann',
+        },
+        clearanceArray:{$push:{'clearance':'$_id.cle','count':'$count'}},
+        maxCount:{$max:'$count'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        clearanceAux:{
+          $filter:{
+            input: '$clearanceArray',
+            as: 'pair',
+            cond:{$gte:['$$pair.count','$maxCount']}
+          }
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        clearance:{$arrayElemAt:['$clearanceAux.clearance',0]}
+      }
     }
+    // {
+    //   '$unwind':'$clearance'
+    // },
+    // {
+    //   $group:{
+    //     _id:{
+    //       aggregazione:'$_id.aggregazione',
+    //       'anno':'$_id.anno'
+    //     },
+    //     maxCount:{$max:'$_id.count'},
+    //     clearance:{$push:'$clearance'}
+    //   }
+    // }
+
+
+    // {
+    //   $sort:{
+    //     '_id.agg':1,
+    //     count:-1
+    //   }
+    // },
+
+
+
+    // {
+    //   $group:{
+    //     _id:{
+    //           aggregazione:'$_id.agg',
+    //           anno:'$_id.ann',
+    //         },
+    //     maxCount:{$max:'$count'}
+    //     clearance:{$push:'$_id.cle'}
+    //   }
+    // }
+    // {
+    //   $group:{
+    //     _id:{
+    //       aggregazione:'$_id.agg',
+    //       anno:'$_id.ann',
+    //     },
+    // //    maxCount:{$max:'$count'},
+    //     clearance:{$push:'$_id.cle'},
+    //   }
+    // },
+    // {
+    //   $sort:{
+    //     _id:-1
+    //   }
+    // }
+
+
+
+    // {
+    //   $project:{
+    //     "_id":1,
+    //     "count":1,
+    //     "clearance":{$ceil:"$_id.cle"}
+    //   }
+    // }
   ])
   return result
 }

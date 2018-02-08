@@ -38,7 +38,7 @@ function fetchData(metric){
 
 //TODO ojo nueva ruta "ByTribunale" con el parámetro
   var urlString = 'http://localhost:3000/clearanceRateByTribunale'
-                + metric + '?tribunale=' + tribunale + '?criteria=' + aggregate
+                + metric + '?tribunale=' + tribunale +'&'+  'criteria=' + aggregate
                 +'&'+ $.param(yearsParam)
   console.log(urlString)
   $(function(){
