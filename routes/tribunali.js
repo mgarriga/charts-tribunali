@@ -78,10 +78,103 @@ router.get("/clearanceRateByTribunaleAverage", (req,res)=>{
       //getClearanceRates(res)
     })
   })
-  // TODO falta filtrar de los del 'criteria' cuales son del mismo grupo
-  //que el tribunal original de arriba
-
 })
 
+//TODO maybe would be better to have a parameter indicating the metric and then
+// calling the specific function within the method (median/mean/mode)
+
+router.get("/clearanceRateByTribunaleMedian", (req,res)=>{
+
+  var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  partial = []
+  cr.getClearanceMedian('$tribunale',years,res).toArray(function (err, data){
+      if (err) {
+        console.log(err)
+        return
+      }
+      for (index in data){
+        var doc = data[index]
+        if (doc['_id'].aggregazione == tribunale){
+          partial.push(doc)
+        }
+      }
+  //    var result = cr.formatClearance(data,"Average")
+
+    var filter
+    tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+      if (err) {
+        console.log(err)
+        return
+      }
+      for (index in data){
+        filter = data[index]
+      }
+      cr.getClearanceMedian('$'+criteria,years,res).toArray(function (err, data){
+        if (err) {
+          console.log(err)
+          return
+        }
+        for (index in data){
+          if (data[index]['_id'].aggregazione == filter[criteria]) partial.push(data[index])
+        }
+        var result = cr.formatClearance(partial,"Median")
+        res.json(result)
+      })
+      //getClearanceRates(res)
+    })
+  })
+})
+
+router.get("/clearanceRateByTribunaleMode", (req,res)=>{
+
+  var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  partial = []
+  cr.getClearanceMode('$tribunale',years,res).toArray(function (err, data){
+      if (err) {
+        console.log(err)
+        return
+      }
+      for (index in data){
+        var doc = data[index]
+        if (doc['_id'].aggregazione == tribunale){
+          partial.push(doc)
+        }
+      }
+  //    var result = cr.formatClearance(data,"Average")
+
+    var filter
+    tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+      if (err) {
+        console.log(err)
+        return
+      }
+      for (index in data){
+        filter = data[index]
+      }
+      cr.getClearanceMode('$'+criteria,years,res).toArray(function (err, data){
+        if (err) {
+          console.log(err)
+          return
+        }
+        for (index in data){
+          if (data[index]['_id'].aggregazione == filter[criteria]) partial.push(data[index])
+        }
+        var result = cr.formatClearance(partial,"Mode")
+        res.json(result)
+      })
+      //getClearanceRates(res)
+    })
+  })
+})
 
 module.exports = router;

@@ -1,5 +1,3 @@
-//const Chart = require('charts.js')
-
 
 var templateTribunali = $('#tribunali-fill').html()
 $(function(){
@@ -19,9 +17,36 @@ $(function(){
   });
 })
 
-var templateString = $('#tabular-template').html()
+function fetchAll(){
+    fetchData('Average',function(success){
+      if (success)
+        fetchData('Median',function(success){
+          if (success)
+            fetchData('Mode',null)
+          else return
+        })
+      else return
+    })
+}
 
-function fetchData(metric){
+var templateStringAvg = $('#tabular-templateAverage').html()
+var templateStringMedian = $('#tabular-templateMedian').html()
+var templateStringMode = $('#tabular-templateMode').html()
+
+function fetchData(metric,callback){
+  switch(metric) {
+    case 'Average':
+      var templateString = templateStringAvg
+      break;
+    case 'Median':
+      var templateString = templateStringMedian
+      break;
+    case 'Mode':
+      var templateString = templateStringMode
+      break;
+    default:
+      var templateString = templateStringAvg
+  }
   console.log(metric)
   console.log('Hello From fetchData()')
   var chartData;
@@ -30,13 +55,10 @@ function fetchData(metric){
   }).get();
   var yearsParam = {years: yearsArray}
   var aggregate = document.getElementById("aggregate").value
-//TODO usar el tribunale para la llamada
   var tribunale = document.getElementById("tribunali").value
   console.log(tribunale)
   if (aggregate == 'null') aggregate = "totale"
-  var title = "Simple Clearance Rate for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
-
-//TODO ojo nueva ruta "ByTribunale" con el parámetro
+  var title = "Simple Clearance Rate " + metric + " for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
   var urlString = 'http://localhost:3000/clearanceRateByTribunale'
                 + metric + '?tribunale=' + tribunale +'&'+  'criteria=' + aggregate
                 +'&'+ $.param(yearsParam)
@@ -51,12 +73,14 @@ function fetchData(metric){
         //console.log("hola" + JSON.stringify(data))
         //console.log($("#tabular-template").html())
         var template = Handlebars.compile(templateString)
-        $("#table-location").html(template(data))
-        drawChart(data,title)
+        $("#table-location"+metric).html(template(data))
+        drawChart(data,title,metric)
+        if (typeof callback === "function") callback(true)
       },
       error: function(xhr,status){
         console.log(xhr)
         console.log(status)
+        if (typeof callback === "function") callback(false)
       }
     })
   })
@@ -69,9 +93,12 @@ function destroyChart(){
   })
 }
 
-function drawChart(rawData, title){
-  var ctx = document.getElementById("ClearanceChart").getContext('2d')
-  destroyChart()
+function drawChart(rawData, title, metric){
+  console.log(metric)
+  $("clearance"+metric).remove();
+  $("div.chart-location"+metric).append('<canvas id="clearance"'+metric+'></canvas>');
+  var ctx = document.getElementById("clearance"+metric).getContext('2d')
+  //destroyChart()
   var fuelChart = new Chart(ctx,{
     type: 'bar',
     data: rawData,
