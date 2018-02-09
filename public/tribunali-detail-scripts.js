@@ -48,22 +48,24 @@ function fetchData(metric,callback){
     default:
       var templateString = templateStringAvg
   }
-  console.log(metric)
-  console.log('Hello From fetchData()')
   var chartData;
   var yearsArray = $('.parent input:checked').map(function () {
     return this.name;
   }).get();
-  var yearsParam = {years: yearsArray}
-  var aggregate = document.getElementById("aggregate").value
-  var tribunale = document.getElementById("tribunali").value
-  console.log(tribunale)
+  var yearsParam    = {years: yearsArray}
+  var aggregate     = $("#aggregate option:selected").val()
+  var tribunale     = $("#tribunali option:selected").val()
+  var indicator     = $("#indicator option:selected").val()
+  var indicatorText = $('#indicator option:selected').text();
   if (aggregate == 'null') aggregate = "totale"
-  var title = "Simple Clearance Rate " + metric + " for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
-  var urlString = 'http://localhost:3000/clearanceRateByTribunale'
-                + metric + '?tribunale=' + tribunale +'&'+  'criteria=' + aggregate
-                +'&'+ $.param(yearsParam)
-  console.log(urlString)
+
+  var title = indicatorText + " " + metric + " for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
+
+  var host      = 'http://localhost:3000/'
+  var urlAddr   = indicator + 'ByTribunale' + metric
+  var params    = '?tribunale=' + tribunale + '&criteria=' + aggregate +'&'+ $.param(yearsParam)
+  var urlString = host + urlAddr + params
+
   $(function(){
     $.ajax({
       url: urlString,

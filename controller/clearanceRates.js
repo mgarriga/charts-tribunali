@@ -1,11 +1,23 @@
 var round =  require('mongo-round')
 
+
+//TODO formatClearance debería estar en la vista, no en el controller
 function formatClearance(data,title){
   //category or "labels" array
   var categoryArray = []
 
   // values array
   var clearanceArray = []
+
+  // //TODO se ve bastaaante feo el randomcolor
+  // var color = [];
+  // var dynamicColors = function() {
+  //   var r = Math.floor(Math.random() * 255);
+  //   var g = Math.floor(Math.random() * 255);
+  //   var b = Math.floor(Math.random() * 255);
+  //   return "rgb(" + r + "," + g + "," + b + ")";
+  // };
+
   for (index in data){
        var doc = data[index]
        var category = doc['_id'].aggregazione
@@ -15,10 +27,14 @@ function formatClearance(data,title){
        var clearance = doc['clearance']
        categoryArray.push(category)
        clearanceArray.push(parseFloat(clearance.toPrecision(3)))
+       // color.push(dynamicColors())
     }
   var datasets=[
     {
       'label':'Clearance ' + title,
+      // backgroundColor: color,
+      // borderColor: 'rgba(200, 200, 200, 0.75)',
+      // hoverBorderColor: 'rgba(200, 200, 200, 1)',
       'data':clearanceArray
     }
   ]
