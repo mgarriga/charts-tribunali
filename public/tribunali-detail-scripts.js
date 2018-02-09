@@ -18,6 +18,7 @@ $(function(){
 })
 
 function fetchAll(){
+    destroyChart()
     fetchData('Average',function(success){
       if (success)
         fetchData('Median',function(success){
@@ -96,10 +97,9 @@ function destroyChart(){
 function drawChart(rawData, title, metric){
   console.log(metric)
   $("clearance"+metric).remove();
-  $("div.chart-location"+metric).append('<canvas id="clearance"'+metric+'></canvas>');
+  $("chart-location"+metric).append('<canvas id="clearance"'+metric+'></canvas>');
   var ctx = document.getElementById("clearance"+metric).getContext('2d')
-  //destroyChart()
-  var fuelChart = new Chart(ctx,{
+  chart = new Chart(ctx,{
     type: 'bar',
     data: rawData,
     options:{
