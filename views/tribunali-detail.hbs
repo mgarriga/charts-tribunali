@@ -30,11 +30,11 @@
 
 <p>
   <label>Indicatore</label>
-  <select id="indicator">
+  <select id="indicator" onchange="changeHeader()">
     <option value="clearanceRate" selected="selected">Simple Clearance Rate</option>
-    <option value="full-clearance">Full Clearance Rate</option>
-    <option value="simple-ut">Arretrato Ultra Triennale (simple)</option>
-    <option value="interyear-ut">Arretrato Ultra Triennale vs anno precedente </option>
+    <option value="clearanceRateFull">Full Clearance Rate</option>
+    <option value="ultraTriennaleSimple">Arretrato Ultra Triennale (simple)</option>
+    <option value="ultraTriennaleInterannuale">Arretrato Ultra Triennale vs anno precedente </option>
   </select>
 </p>
 

@@ -17,6 +17,12 @@ $(function(){
   });
 })
 
+function changeHeader(){
+  var optionSelected = $('#indicator option:selected').text();
+  $('#chartHeader').html(optionSelected)
+
+}
+
 function fetchAll(){
     destroyChart()
     fetchData('Average',function(success){
