@@ -294,6 +294,12 @@ function getFullClearanceAvg(criteria, year, res){
       }
     },
     {
+      $project:{
+        _id:1,
+        clearance:round('$clearance',2)
+      }
+    },
+    {
       $sort:{_id:1}
     }
   ])
@@ -308,3 +314,146 @@ function getFullClearanceAvg(criteria, year, res){
 }
 
 module.exports.getFullClearanceAvg =  getFullClearanceAvg
+
+function getFullClearanceMedian(criteria, year, res){
+  years = [year-1,year]
+  // console.log(years)
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            // First step is to calculate FCR by tribunale.
+            // we should keep dimension and area as well, to then group by any of them
+            'tribunale':'$tribunale',
+            'dimensione':'$dimensione',
+            'area':'$area'
+            //'aggregazione':criteria,
+            //'anno':'$anno'
+          },
+          definitiAct:{
+            $push:{$cond:[{$eq:['$anno',year]},'$definiti',false]}
+          },
+          iscrittiAct:{
+            $push:{$cond:[{$eq:['$anno',year]},'$iscritti',false]}
+          },
+          pendentiPre:{
+            $push:{$cond:[{$eq:['$anno',year]},false,'$pendenti']}
+          }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        definitiAct:{
+          '$setDifference':['$definitiAct',[false]]
+        },
+        iscrittiAct:{
+          '$setDifference':['$iscrittiAct',[false]]
+        },
+        pendentiPre:{
+          '$setDifference':['$pendentiPre',[false]]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        'tribunale':'$_id.tribunale',
+        'dimensione':'$_id.dimensione',
+        'area':'$_id.area',
+        fullClearance:{
+          $divide:[{$arrayElemAt:["$definitiAct",0]},
+                   {$sum:[{$arrayElemAt:["$pendentiPre",0]},
+                          {$arrayElemAt:["$iscrittiAct",0]}]}]
+        }
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+          },
+          count:{
+            $sum:1
+          },
+          simpleClearance:{$push:'$fullClearance'}
+      }
+    },
+    {
+      '$unwind':'$simpleClearance'
+    },
+    {
+      $sort:{
+        simpleClearance:1
+      }
+    },
+    {
+      $project:{
+        '_id':1,
+        'count':1,
+        'simpleClearance':1,
+        'midpoint':{
+          $divide:['$count',2]
+        }
+      }
+    },
+    {
+      $project:{
+        '_id':1,
+        'count':1,
+        'simpleClearance':1,
+        'midpoint':1,
+        'high':{$ceil:'$midpoint'},
+        'low':{$floor:'$midpoint'}
+      }
+    },
+    {
+      $group:{
+        _id:'$_id',
+        simpleClearance:{
+          $push:'$simpleClearance'
+        },
+        high:{$avg:'$high'},
+        low:{$avg:'$low'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        beginValue:{$arrayElemAt:['$simpleClearance','$high']},
+        endValue:  {$arrayElemAt:['$simpleClearance','$low']}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        'clearance':{$avg:['$beginValue','$endValue']}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        clearance:round('$clearance',2)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(data)
+  // })
+  return result
+}
+
+module.exports.getFullClearanceMedian =  getFullClearanceMedian
