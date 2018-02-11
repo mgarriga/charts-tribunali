@@ -145,7 +145,6 @@ function getClearanceMedian(criteria, years, res){
 
 module.exports.getClearanceMedian = getClearanceMedian
 
-// TODO: Move function to a script folder with each function doing what it knows
 function getClearanceAvg(criteria, years, res){
 
   result = db.collection("siecic").aggregate([
@@ -220,67 +219,92 @@ function getClearanceMode(criteria, years, res){
         clearance:{$arrayElemAt:['$clearanceAux.clearance',0]}
       }
     }
-    // {
-    //   '$unwind':'$clearance'
-    // },
-    // {
-    //   $group:{
-    //     _id:{
-    //       aggregazione:'$_id.aggregazione',
-    //       'anno':'$_id.anno'
-    //     },
-    //     maxCount:{$max:'$_id.count'},
-    //     clearance:{$push:'$clearance'}
-    //   }
-    // }
-
-
-    // {
-    //   $sort:{
-    //     '_id.agg':1,
-    //     count:-1
-    //   }
-    // },
-
-
-
-    // {
-    //   $group:{
-    //     _id:{
-    //           aggregazione:'$_id.agg',
-    //           anno:'$_id.ann',
-    //         },
-    //     maxCount:{$max:'$count'}
-    //     clearance:{$push:'$_id.cle'}
-    //   }
-    // }
-    // {
-    //   $group:{
-    //     _id:{
-    //       aggregazione:'$_id.agg',
-    //       anno:'$_id.ann',
-    //     },
-    // //    maxCount:{$max:'$count'},
-    //     clearance:{$push:'$_id.cle'},
-    //   }
-    // },
-    // {
-    //   $sort:{
-    //     _id:-1
-    //   }
-    // }
-
-
-
-    // {
-    //   $project:{
-    //     "_id":1,
-    //     "count":1,
-    //     "clearance":{$ceil:"$_id.cle"}
-    //   }
-    // }
   ])
   return result
 }
 
 module.exports.getClearanceMode = getClearanceMode
+
+//TODO En este caso debe recibir sólo un año, para hacer retrieve de año -1
+function getFullClearanceAvg(criteria, year, res){
+  years = [year-1,year]
+  // console.log(years)
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            // First step is to calculate FCR by tribunale.
+            // we should keep dimension and area as well, to then group by any of them
+            'tribunale':'$tribunale',
+            'dimensione':'$dimensione',
+            'area':'$area'
+            //'aggregazione':criteria,
+            //'anno':'$anno'
+          },
+          definitiAct:{
+            $push:{$cond:[{$eq:['$anno',year]},'$definiti',false]}
+          },
+          iscrittiAct:{
+            $push:{$cond:[{$eq:['$anno',year]},'$iscritti',false]}
+          },
+          pendentiPre:{
+            $push:{$cond:[{$eq:['$anno',year]},false,'$pendenti']}
+          }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        definitiAct:{
+          '$setDifference':['$definitiAct',[false]]
+        },
+        iscrittiAct:{
+          '$setDifference':['$iscrittiAct',[false]]
+        },
+        pendentiPre:{
+          '$setDifference':['$pendentiPre',[false]]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        'tribunale':'$_id.tribunale',
+        'dimensione':'$_id.dimensione',
+        'area':'$_id.area',
+        fullClearance:{
+          $divide:[{$arrayElemAt:["$definitiAct",0]},
+                   {$sum:[{$arrayElemAt:["$pendentiPre",0]},
+                          {$arrayElemAt:["$iscrittiAct",0]}]}]
+        }
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+          },
+          clearance:{$avg:'$fullClearance'}
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(data)
+  // })
+  return result
+}
+
+module.exports.getFullClearanceAvg =  getFullClearanceAvg
