@@ -262,12 +262,6 @@ router.get("/clearanceRateFullByTribunaleMedian", (req,res)=>{
   })
   partial = []
 
-
-  // for (index in years){
-  //   year = years[index]
-  // }
-
-  //TODO llamar dentro del for para cada año
   let requests = years.map((year) => {
       return new Promise((resolve,reject) => {
 //        asyncFunction(year, resolve);
@@ -328,5 +322,76 @@ router.get("/clearanceRateFullByTribunaleMedian", (req,res)=>{
 
 })
 
+router.get("/clearanceRateFullByTribunaleMode", (req,res)=>{
+
+  // console.log("puto el que lee")
+
+  var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  partial = []
+
+  let requests = years.map((year) => {
+      return new Promise((resolve,reject) => {
+//        asyncFunction(year, resolve);
+        // console.log(year)
+
+        cr.getFullClearanceMode('$tribunale',year,res).toArray(function (err, data){
+          if (err) {
+            console.log(err)
+            reject(err)
+          }
+
+          for (index in data){
+            var doc = data[index]
+            if (doc['_id'].aggregazione == tribunale){
+              doc['_id'].anno = year
+              partial.push(doc)
+            }
+          }
+          //    var result = cr.formatClearance(data,"Average")
+
+          var filter
+          tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+            if (err) {
+              console.log(err)
+              reject(err)
+            }
+            for (index in data){
+              filter = data[index]
+            }
+
+            cr.getFullClearanceMode('$'+criteria,year,res).toArray(function (err, data){
+              if (err) {
+                console.log(err)
+                reject(err)
+              }
+              // console.log(data)
+
+              for (index in data){
+                if (data[index]['_id'].aggregazione == filter[criteria]){
+                  data[index]['_id'].anno = year
+                  partial.push(data[index])
+                }
+              }
+              resolve(true)
+            })
+          })
+        })
+      });
+  })
+
+  Promise.all(requests).then(() => {
+    // console.log('done')
+    var result = cr.formatClearance(partial,"Mode")
+    res.json(result)
+  },(error)=>{
+    console.log(error)
+  });
+
+})
 
 module.exports = router;

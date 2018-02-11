@@ -225,7 +225,6 @@ function getClearanceMode(criteria, years, res){
 
 module.exports.getClearanceMode = getClearanceMode
 
-//TODO En este caso debe recibir sólo un año, para hacer retrieve de año -1
 function getFullClearanceAvg(criteria, year, res){
   years = [year-1,year]
   // console.log(years)
@@ -456,4 +455,118 @@ function getFullClearanceMedian(criteria, year, res){
   return result
 }
 
+
 module.exports.getFullClearanceMedian =  getFullClearanceMedian
+
+function getFullClearanceMode(criteria, year, res){
+  years = [year-1,year]
+  // console.log(years)
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            // First step is to calculate FCR by tribunale.
+            // we should keep dimension and area as well, to then group by any of them
+            'tribunale':'$tribunale',
+            'dimensione':'$dimensione',
+            'area':'$area'
+            //'aggregazione':criteria,
+            //'anno':'$anno'
+          },
+          definitiAct:{
+            $push:{$cond:[{$eq:['$anno',year]},'$definiti',false]}
+          },
+          iscrittiAct:{
+            $push:{$cond:[{$eq:['$anno',year]},'$iscritti',false]}
+          },
+          pendentiPre:{
+            $push:{$cond:[{$eq:['$anno',year]},false,'$pendenti']}
+          }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        definitiAct:{
+          '$setDifference':['$definitiAct',[false]]
+        },
+        iscrittiAct:{
+          '$setDifference':['$iscrittiAct',[false]]
+        },
+        pendentiPre:{
+          '$setDifference':['$pendentiPre',[false]]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        'tribunale':'$_id.tribunale',
+        'dimensione':'$_id.dimensione',
+        'area':'$_id.area',
+        fullClearance:{
+          $divide:[{$arrayElemAt:["$definitiAct",0]},
+                   {$sum:[{$arrayElemAt:["$pendentiPre",0]},
+                          {$arrayElemAt:["$iscrittiAct",0]}]}]
+        }
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            cle:round('$fullClearance',2),
+          },
+          count:{
+            $sum:1
+          }
+      }
+    },
+    {
+      $group:{
+        _id:{
+          aggregazione:'$_id.aggregazione'
+        },
+        clearanceArray:{$push:{'clearance':'$_id.cle','count':'$count'}},
+        maxCount:{$max:'$count'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        clearanceAux:{
+          $filter:{
+            input:'$clearanceArray',
+            as:'pair',
+            cond:{$gte:['$$pair.count','$maxCount']}
+          }
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        clearance:round({$arrayElemAt:['$clearanceAux.clearance',0]},2)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(data)
+  // })
+  return result
+}
+
+module.exports.getFullClearanceMode =  getFullClearanceMode
