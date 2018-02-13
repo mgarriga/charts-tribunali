@@ -7,6 +7,7 @@ const MongoClient = require('mongodb').MongoClient
 const chartJs     = require('chart.js')
 const app         = express()
 const routes      = require('./routes');
+const utils       = require('./utils/importScripts')
 //http://52.27.220.158:5001
 
 // initializes the handlebars engine and sets the layouts
@@ -29,7 +30,11 @@ app.use('/',routes);
 
 app.get('/',(request,response) =>{
   //Render takes the name of the view (home) and the data to render (name)
-  response.render('home',{
+  // utils.updateInts(['pendenti'],function(status){
+  //   if (status) console.log('tutto benne')
+  //   else console.log('tutto male')
+  // })
+  response.render('tribunali-detail',{
     name:'Martin'
   })
 })

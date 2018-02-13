@@ -33,8 +33,9 @@
   <select id="indicator" onchange="changeHeader()">
     <option value="clearanceRate" selected="selected">Simple Clearance Rate</option>
     <option value="clearanceRateFull">Full Clearance Rate</option>
-    <option value="ultraTriennaleSimple">Arretrato Ultra Triennale (simple)</option>
-    <option value="ultraTriennaleInterannuale">Arretrato Ultra Triennale vs anno precedente </option>
+    <option value="UTObiettivi">Arretrato Ultra Triennale vs Obietivvi</option>
+    <option value="UTInterannuale">Arretrato Ultra Triennale vs Anno Precedente </option>
+    <option value="UTSuPendenti">Peso Ultra Triennale vs Totale Pendenti </option>
   </select>
 </p>
 
@@ -60,6 +61,9 @@
   <input type="button" value="Show Mode!" onclick="fetchData('Mode',null)"/>
 </p>
 
+
+<h2 id="chartHeader">Simple Clearance Rate</h2>
+
 <div id="table-locationAverage">
   <script id="tabular-templateAverage" type="text/html">
   <h2>Tabular Data</h2>
@@ -82,7 +86,6 @@
   </script>
 </div>
 
-<h2 id="chartHeader">Simple Clearance Rate</h2>
 <div id="chart-locationAverage" class="container">
     <canvas id="clearanceAverage"></canvas>
 </div>

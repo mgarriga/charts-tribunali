@@ -72,7 +72,7 @@ nro,tribunale,area,dimensione,anno,pendenti,pendenti-ultra-triennali,pendenti-ul
 71,MODENA,Nord-Est,Grande,2013,4114,1025,25%,5458,5214,161,0.4,0.96,39,31,8,21%,106,80,27,25%
 72,MONZA,Nord-Ovest,Molto grande o metropolitano,2013,8418,2049,24%,9124,8007,234,0.6,0.88,58,50,8,14%,145,104,42,29%
 73,NAPOLI,Sud,Molto grande o metropolitano,2013,30811,8074,26%,35052,20861,346,0.9,0.6,313,276,37,12%,885,633,252,28%
-74,NAPOLI NORD,Sud,Molto grande o metropolitano,2013,925,0,0%,1272,315,36,0.1,0.25,81,68,13,16%,147,105,42,29%
+74,NAPOLI NORD,Sud,Molto grande o metropolitano,2013,925,1,1%,1272,315,36,0.1,0.25,81,68,13,16%,147,105,42,29%
 75,NOCERA INFERIORE,Sud,Medio grande,2013,3857,1093,28%,3410,3173,409,1.1,0.93,30,27,3,10%,94,79,15,16%
 76,NOLA,Sud,Grande,2013,7531,1837,24%,4935,3409,599,1.6,0.69,50,45,5,10%,131,102,29,22%
 77,NOVARA,Nord-Ovest,Medio grande,2013,2773,307,11%,2897,2813,311,0.9,0.97,18,14,4,22%,64,47,17,27%

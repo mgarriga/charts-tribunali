@@ -66,6 +66,7 @@ function fetchData(metric,callback){
   if (aggregate == 'null') aggregate = "totale"
 
   var title = indicatorText + " " + metric + " for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
+  var type  = 'bar' //TODO get the type of graphic from select in the page
 
   var host      = 'http://localhost:3000/'
   var urlAddr   = indicator + 'ByTribunale' + metric
@@ -83,7 +84,7 @@ function fetchData(metric,callback){
         //console.log($("#tabular-template").html())
         var template = Handlebars.compile(templateString)
         $("#table-location"+metric).html(template(data))
-        drawChart(data,title,metric)
+        drawChart(data,title,metric,type)
         if (typeof callback === "function") callback(true)
       },
       error: function(xhr,status){
@@ -102,18 +103,34 @@ function destroyChart(){
   })
 }
 
-function drawChart(rawData, title, metric){
+function drawChart(rawData, title, metric, typeChart){
   console.log(metric)
   $("clearance"+metric).remove();
   $("chart-location"+metric).append('<canvas id="clearance"'+metric+'></canvas>');
   var ctx = document.getElementById("clearance"+metric).getContext('2d')
   chart = new Chart(ctx,{
-    type: 'bar',
+    type: typeChart,
     data: rawData,
     options:{
       title:{
         display:true,
-        text: title
+        text: title,
+
+      },
+      //TODO Move scales to formatMetric() to set the options according to the metric
+      scales: {
+        yAxes: [{
+          ticks: {
+            // the data minimum used for determining the ticks is Math.min(dataMin, suggestedMin)
+            //beginAtZero: true,
+            suggestedMin: 0,
+            // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
+            // suggestedMax: 1,
+            stepSize: 0.1,
+            // fixedStepSize:0.1,
+            min: -0.1
+          }
+        }]
       }
     }
   })
