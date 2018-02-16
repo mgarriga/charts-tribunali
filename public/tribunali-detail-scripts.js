@@ -83,7 +83,7 @@ function fetchData(metric,callback){
         //console.log("hola" + JSON.stringify(data))
         //console.log($("#tabular-template").html())
         var template = Handlebars.compile(templateString)
-        $("#table-location"+metric).html(template(data))
+        $("#table-location"+metric).html(template(data['data']))
         drawChart(data,title,metric,type)
         if (typeof callback === "function") callback(true)
       },
@@ -110,29 +110,9 @@ function drawChart(rawData, title, metric, typeChart){
   var ctx = document.getElementById("clearance"+metric).getContext('2d')
   chart = new Chart(ctx,{
     type: typeChart,
-    data: rawData,
-    options:{
-      title:{
-        display:true,
-        text: title,
+    data: rawData['data'],
+    options:rawData['options']
 
-      },
-      //TODO Move scales to formatMetric() to set the options according to the metric
-      scales: {
-        yAxes: [{
-          ticks: {
-            // the data minimum used for determining the ticks is Math.min(dataMin, suggestedMin)
-            //beginAtZero: true,
-            suggestedMin: 0,
-            // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
-            // suggestedMax: 1,
-            stepSize: 0.1,
-            // fixedStepSize:0.1,
-            min: -0.1
-          }
-        }]
-      }
-    }
   })
 }
 

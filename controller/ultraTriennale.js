@@ -40,8 +40,30 @@ function formatUT(data,title){
   ]
 
   var response = {
-    "labels":categoryArray,
-    "datasets":datasets
+    data:{
+      "labels":categoryArray,
+      "datasets":datasets
+    },
+    options:{
+      title:{
+        display:true,
+        text: 'Clearance ' + title,
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            // the data minimum used for determining the ticks is Math.min(dataMin, suggestedMin)
+            //beginAtZero: true,
+            suggestedMin: 0,
+            // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
+            // suggestedMax: 1,
+            stepSize: 0.1,
+            // fixedStepSize:0.1,
+            min: -0.1
+          }
+        }]
+      }
+    }
   }
   return response
 //  console.log(JSON.stringify(response))
