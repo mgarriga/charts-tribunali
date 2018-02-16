@@ -19,6 +19,31 @@ router.get("/DurataPrognosticaByTribunaleAverage", (req,res)=>{
   })
 })
 
+router.get("/DurataPrognosticaByTribunaleMedian", (req,res)=>{
+
+  var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getDurataPrognosticaByTribunale('Median', tribunale,criteria,years,function(result){
+      res.json(result)
+  })
+})
+
+router.get("/DurataPrognosticaByTribunaleMode", (req,res)=>{
+
+  var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getDurataPrognosticaByTribunale('Mode', tribunale,criteria,years,function(result){
+      res.json(result)
+  })
+})
 
 function getDurataPrognosticaByTribunale(metric, tribunale,criteria,years,callback){
   partial = []

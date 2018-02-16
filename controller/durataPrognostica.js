@@ -55,7 +55,7 @@ function formatDP(data,title){
           ticks: {
             // the data minimum used for determining the ticks is Math.min(dataMin, suggestedMin)
             //beginAtZero: true,
-            suggestedMin: 0,
+            suggestedMin: 180,
             // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
             // suggestedMax: 1,
             stepSize: 20,
@@ -110,4 +110,157 @@ function getDurataPrognosticaAvg(criteria, years){
   return result
 }
 
-module.exports.getDurataPrognosticaAvg = getDurataPrognosticaAvg
+function getDurataPrognosticaMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        durataPrognostica:{$push:{$multiply:[365,{$divide:["$pendenti","$definiti"]}]}}
+      }
+    },
+    {
+      "$unwind":"$durataPrognostica"
+    },
+    {
+      "$sort":{
+        durataPrognostica:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "durataPrognostica":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "durataPrognostica":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        durataPrognostica:{
+          $push:"$durataPrognostica"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        //simpleClearance:1,
+        "beginValue":{
+          "$arrayElemAt":["$durataPrognostica","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$durataPrognostica","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        durataPrognostica:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        durataPrognostica:round('$durataPrognostica',0)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+function getDurataPrognosticaMode(criteria, years, res){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'agg':criteria,
+          'ann':'$anno',
+          dp:round({$avg:{$multiply:[365,{$divide:["$pendenti","$definiti"]}]}},0),
+        },
+        count:{
+            $sum: 1
+        }
+      }
+    },
+    {
+      $group:{
+        _id:{
+          aggregazione:'$_id.agg',
+          'anno':'$_id.ann',
+        },
+        dpArray:{$push:{'durataPrognostica':'$_id.dp','count':'$count'}},
+        maxCount:{$max:'$count'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        dpAux:{
+          $filter:{
+            input: '$dpArray',
+            as: 'pair',
+            cond:{$gte:['$$pair.count','$maxCount']}
+          }
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        durataPrognostica:{$arrayElemAt:['$dpAux.durataPrognostica',0]}
+      }
+    }
+  ])
+  return result
+}
+
+
+module.exports.getDurataPrognosticaAvg    = getDurataPrognosticaAvg
+module.exports.getDurataPrognosticaMedian = getDurataPrognosticaMedian
+module.exports.getDurataPrognosticaMode   = getDurataPrognosticaMode
