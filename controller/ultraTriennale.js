@@ -47,6 +47,7 @@ function formatUT(data,title){
 //  console.log(JSON.stringify(response))
 }
 
+
 module.exports.formatUT = formatUT
 
 
@@ -462,7 +463,7 @@ module.exports.getUTInterannualeMode   =  getUTInterannualeMode
 
 //-------------------------------------------------------------------------
 
-function getUTSuPendentiAvg(criteria, years, res){
+function getUTSuPendentiAvg(criteria, years){
 
   result = db.collection("siecic").aggregate([
     {
@@ -644,7 +645,192 @@ function getUTSuPendentiMode(criteria, years, res){
   return result
 }
 
-
 module.exports.getUTSuPendentiAvg    = getUTSuPendentiAvg
 module.exports.getUTSuPendentiMedian = getUTSuPendentiMedian
 module.exports.getUTSuPendentiMode   = getUTSuPendentiMode
+
+function getUTObiettiviAvg(criteria, years, res){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          ultraTriennale:{$avg:'$obiettivo-ultra-triennali'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:round('$ultraTriennale',2)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+function getUTObiettiviMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        ultraTriennale:{
+          $push:'$obiettivo-ultra-triennali'
+        }
+      }
+    },
+    {
+      "$unwind":"$ultraTriennale"
+    },
+    {
+      "$sort":{
+        ultraTriennale:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "ultraTriennale":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "ultraTriennale":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        ultraTriennale:{
+          $push:"$ultraTriennale"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        //simpleClearance:1,
+        "beginValue":{
+          "$arrayElemAt":["$ultraTriennale","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$ultraTriennale","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:round('$ultraTriennale',2)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+function getUTObiettiviMode(criteria, years, res){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'agg':criteria,
+          'ann':'$anno',
+          ut:'$obiettivo-ultra-triennali',
+        },
+        count:{
+            $sum: 1
+        }
+      }
+    },
+    {
+      $group:{
+        _id:{
+          aggregazione:'$_id.agg',
+          'anno':'$_id.ann',
+        },
+        utArray:{$push:{'ultraTriennale':'$_id.ut','count':'$count'}},
+        maxCount:{$max:'$count'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        utAux:{
+          $filter:{
+            input: '$utArray',
+            as: 'pair',
+            cond:{$gte:['$$pair.count','$maxCount']}
+          }
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:{$arrayElemAt:['$utAux.ultraTriennale',0]}
+      }
+    }
+  ])
+  return result
+}
+
+module.exports.getUTObiettiviAvg    = getUTObiettiviAvg
+module.exports.getUTObiettiviMedian = getUTObiettiviMedian
+module.exports.getUTObiettiviMode   = getUTObiettiviMode
