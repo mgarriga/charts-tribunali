@@ -87,7 +87,7 @@ function getProduttivitaMagistratoAvg(criteria, years){
             'aggregazione':criteria,
             'anno':'$anno'
           },
-          produttivita:{$avg:{$divide:["$definiti","$magistrati-presenti"]}}
+          produttivita:{$avg:{$divide:["$definiti","$magistrati-presenti"]}},
       }
     },
     {
@@ -100,13 +100,6 @@ function getProduttivitaMagistratoAvg(criteria, years){
       $sort:{_id:1}
     }
   ])
-  // .toArray(function(err,data){
-  //   if (err) {
-  //     console.log(err)
-  //     return
-  //   }
-  //   console.log(data)
-  // })
   return result
 }
 
@@ -259,7 +252,292 @@ function getProduttivitaMagistratoMode(criteria, years, res){
   return result
 }
 
-
 module.exports.getProduttivitaMagistratoAvg    = getProduttivitaMagistratoAvg
 module.exports.getProduttivitaMagistratoMedian = getProduttivitaMagistratoMedian
 module.exports.getProduttivitaMagistratoMode   = getProduttivitaMagistratoMode
+
+function getProduttivitaControfattualeAvg(criteria, years){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+           datiTrib:{$push:{'definiti':'$definiti',
+                           'magistrati-presenti':'$magistrati-presenti',
+                           'tribunale':'$tribunale'}},
+          prodAvg:{$avg:{$divide:['$definiti','$magistrati-presenti']}}
+      }
+    },
+    {
+      $unwind:'$datiTrib'
+    },
+    {
+      $project:{
+        _id:1,
+        prodAvg:round('$prodAvg',0),
+        definiti:'$datiTrib.definiti',
+        // prodControfattuale:{$divide:['$datiTrib.definiti','$prodAvg']},
+        prodReal:round({$divide:['$datiTrib.definiti','$datiTrib.magistrati-presenti']},0),
+        prodControfattuale:round({$multiply:['$prodAvg','$datiTrib.magistrati-presenti']},0),
+        tribunale:'$datiTrib.tribunale',
+        definitiControffatuale:round({$multiply:['$prodAvg','$datiTrib.magistrati-presenti']},0)
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        tribunale:1,
+        prodAvg:1,
+        prodReal:1,
+        definiti:1,
+        definitiControffatuale:1,
+        // prodControfattuale:1,
+        produttivita:round(
+          {$multiply:[100,
+            {$divide:[{$subtract:['$definiti','$prodControfattuale']},
+                                  '$prodControfattuale']}]})
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+    // .toArray(function(err,data){
+    //   if (err) {
+    //     console.log(err)
+    //     return
+    //   }
+    //   console.log(JSON.stringify(data))
+    // })
+  return result
+}
+
+function getProduttivitaControfattualeMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        prodMedian:{$push:{$divide:["$definiti","$magistrati-presenti"]}},
+        datiTrib:{$push:{'definiti':'$definiti',
+                        'magistrati-presenti':'$magistrati-presenti',
+                        'tribunale':'$tribunale'}},
+      }
+    },
+    {
+      "$unwind":"$prodMedian"
+    },
+    {
+      "$sort":{
+        prodMedian:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "prodMedian":1,
+        'datiTrib':1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "prodMedian":1,
+        'datiTrib':1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        prodMedian:{
+          $push:"$prodMedian"
+        },
+        datiTrib:{$first:'$datiTrib'},
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        prodMedian:1,
+        datiTrib:1,
+        "beginValue":{
+          "$arrayElemAt":["$prodMedian","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$prodMedian","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        datiTrib:1,
+        prodMedian:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $unwind:'$datiTrib'
+    },
+    {
+      $project:{
+        _id:1,
+        datiTrib:1,
+        prodControfattuale:round({$multiply:['$prodMedian','$datiTrib.magistrati-presenti']},0)
+        // prodMedian:1
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        tribunale:'$datiTrib.tribunale',
+        produttivita:round(
+          {$multiply:[100,
+            {$divide:[{$subtract:['$datiTrib.definiti','$prodControfattuale']},
+                                  '$prodControfattuale']}]},0)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(JSON.stringify(data))
+  // })
+  return result
+}
+
+function getProduttivitaControfattualeMode(criteria, years, res){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'agg':criteria,
+          'ann':'$anno',
+          p:round({$avg:{$divide:["$definiti","$magistrati-presenti"]}},0),
+        },
+        count:{
+            $sum: 1
+        },
+        datiTrib:{$push:{'definiti':'$definiti',
+                        'magistrati-presenti':'$magistrati-presenti',
+                        'tribunale':'$tribunale'}}
+      }
+    },
+    {
+      $group:{
+        _id:{
+          aggregazione:'$_id.agg',
+          'anno':'$_id.ann',
+        },
+        pArray:{$push:{'produttivita':'$_id.p','count':'$count'}},
+        maxCount:{$max:'$count'},
+        datiTrib:{$push:'$datiTrib'}
+      }
+    },
+    {
+      $unwind:'$datiTrib'
+    },
+    {
+      $project:{
+        _id:1,
+        datiTrib:1,
+        pAux:{
+          $filter:{
+            input: '$pArray',
+            as: 'pair',
+            cond:{$gte:['$$pair.count','$maxCount']}
+          }
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        datiTrib:{$arrayElemAt:['$datiTrib',0]},
+        prodMode:{$arrayElemAt:['$pAux.produttivita',0]}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        datiTrib:1,
+        prodControfattuale:round({$multiply:['$prodMode','$datiTrib.magistrati-presenti']},0)
+        // prodMedian:1
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        tribunale:'$datiTrib.tribunale',
+        produttivita:round(
+          {$multiply:[100,
+            {$divide:[{$subtract:['$datiTrib.definiti','$prodControfattuale']},
+                                  '$prodControfattuale']}]},0)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(JSON.stringify(data))
+  // })
+  return result
+}
+
+
+module.exports.getProduttivitaControfattualeAvg    = getProduttivitaControfattualeAvg
+module.exports.getProduttivitaControfattualeMedian = getProduttivitaControfattualeMedian
+module.exports.getProduttivitaControfattualeMode   = getProduttivitaControfattualeMode
