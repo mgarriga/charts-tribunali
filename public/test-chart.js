@@ -13,7 +13,7 @@ function fetchData(metric){
   var aggregate = document.getElementById("aggregate").value
   if (aggregate == 'null') aggregate = "totale"
   var title = "Simple Clearance Rate for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
-  var urlString = 'http://localhost:3000/clearanceRate'+ metric + '?criteria=' + aggregate +'&'+ $.param(yearsParam)
+  var urlString = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/clearanceRate'+ metric + '?criteria=' + aggregate +'&'+ $.param(yearsParam)
   console.log(urlString)
   $(function(){
     $.ajax({
