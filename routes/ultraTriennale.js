@@ -115,7 +115,7 @@ router.get("/UTInterannualeByTribunaleAverage", (req,res)=>{
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      getUTInterannualeByTribunale('Average',tribunale,criteria,year,function(err, result){
+      ut.getUTInterannualeByTribunale('Average',tribunale,criteria,year,function(err, result){
           if (err){
             console.log(err)
             reject(err)
@@ -145,7 +145,7 @@ router.get("/UTInterannualeByTribunaleMedian", (req,res)=>{
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      getUTInterannualeByTribunale('Median',tribunale,criteria,year,function(err, result){
+      ut.getUTInterannualeByTribunale('Median',tribunale,criteria,year,function(err, result){
           if (err){
             console.log(err)
             reject(err)
@@ -175,7 +175,7 @@ router.get("/UTInterannualeByTribunaleMode", (req,res)=>{
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      getUTInterannualeByTribunale('Mode',tribunale,criteria,year,function(err, result){
+      ut.getUTInterannualeByTribunale('Mode',tribunale,criteria,year,function(err, result){
           if (err){
             console.log(err)
             reject(err)
@@ -301,64 +301,6 @@ function getUTObiettiviByTribunale(metric, tribunale,criteria,years,callback){
   })
 }
 
-function getUTInterannualeByTribunale(metric,tribunale,criteria,year,callback){
-
-  //TODO add switch metric statement
-  switch(metric) {
-      case 'Average':
-          funct = ut.getUTInterannualeAvg
-          break;
-      case 'Median':
-          funct = ut.getUTInterannualeMedian
-          break;
-      case 'Mode':
-          funct = ut.getUTInterannualeMode
-          break;
-      default:
-          funct = ut.getUTInterannualeAvg
-  }
-
-  var partialRes = []
-  funct('$tribunale',year).toArray(function (err, data){
-    if (err) {
-      console.log(err)
-      callback(err,null)
-    }
-    for (index in data){
-      var doc = data[index]
-      if (doc['_id'].aggregazione == tribunale){
-        doc['_id'].anno = year
-        partialRes.push(doc)
-      }
-    }
-    //    var result = cr.formatClearance(data,"Average")
-
-    var filter
-    tr.getTribunaleDetail(tribunale).toArray(function(err,data){
-      if (err) {
-        console.log(err)
-        callback(err,null)
-      }
-      for (index in data){
-        filter = data[index]
-      }
-      funct('$'+criteria,year)
-      .toArray(function (err, data){
-        if (err) {
-          console.log(err)
-          callback(err,null)
-        }
-        for (index in data){
-          if (data[index]['_id'].aggregazione == filter[criteria]){
-            data[index]['_id'].anno = year
-            partialRes.push(data[index])
-          }
-        }
-        callback(null,partialRes)
-      })
-    })
-  })
-}
 
 module.exports = router
 

@@ -1,5 +1,5 @@
 var round =  require('mongo-round')
-
+var tr = require('./tribunali')
 
 //TODO formatClearance debería estar en la vista, no en el controller
 function formatUT(data,title){
@@ -47,7 +47,7 @@ function formatUT(data,title){
     options:{
       title:{
         display:true,
-        text: 'Clearance ' + title,
+        text: 'Ultra Triennale ' + title,
       },
       scales: {
         yAxes: [{
@@ -57,9 +57,9 @@ function formatUT(data,title){
             suggestedMin: 0,
             // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
             // suggestedMax: 1,
-            stepSize: 0.1,
+            stepSize: 10,
             // fixedStepSize:0.1,
-            min: -0.1
+            min: -10
           }
         }]
       }
@@ -168,7 +168,7 @@ function getUTInterannualeAvg(criteria, year){
     {
       $project:{
         _id:1,
-        ultraTriennale:round('$utInterannuale',2)
+        ultraTriennale:round({$multiply:['$utInterannuale',100]},0)
       }
     },
     {
@@ -332,7 +332,7 @@ function getUTInterannualeMedian(criteria, year){
     {
       $project:{
         _id:1,
-        ultraTriennale:round('$utInterannuale',2)
+        ultraTriennale:round({$multiply:['$utInterannuale',100]},0)
       }
     },
     {
@@ -465,6 +465,12 @@ function getUTInterannualeMode(criteria, year){
       }
     },
     {
+      $project:{
+        _id:1,
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
+      }
+    },
+    {
       $sort:{_id:1}
     }
   ])
@@ -504,7 +510,7 @@ function getUTSuPendentiAvg(criteria, years){
     {
       $project:{
         _id:1,
-        ultraTriennale:round('$ultraTriennale',2)
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
       }
     },
     {
@@ -604,7 +610,7 @@ function getUTSuPendentiMedian(criteria, years, res){
     {
       $project:{
         _id:1,
-        ultraTriennale:round('$ultraTriennale',2)
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
       }
     },
     {
@@ -661,6 +667,15 @@ function getUTSuPendentiMode(criteria, years, res){
         _id:1,
         ultraTriennale:{$arrayElemAt:['$utAux.ultraTriennale',0]}
       }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
+      }
+    },
+    {
+      $sort:{_id:1}
     }
   ])
   return result
@@ -690,7 +705,7 @@ function getUTObiettiviAvg(criteria, years, res){
     {
       $project:{
         _id:1,
-        ultraTriennale:round('$ultraTriennale',2)
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
       }
     },
     {
@@ -790,7 +805,7 @@ function getUTObiettiviMedian(criteria, years, res){
     {
       $project:{
         _id:1,
-        ultraTriennale:round('$ultraTriennale',2)
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
       }
     },
     {
@@ -847,6 +862,15 @@ function getUTObiettiviMode(criteria, years, res){
         _id:1,
         ultraTriennale:{$arrayElemAt:['$utAux.ultraTriennale',0]}
       }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
+      }
+    },
+    {
+      $sort:{_id:1}
     }
   ])
   return result
@@ -855,3 +879,324 @@ function getUTObiettiviMode(criteria, years, res){
 module.exports.getUTObiettiviAvg    = getUTObiettiviAvg
 module.exports.getUTObiettiviMedian = getUTObiettiviMedian
 module.exports.getUTObiettiviMode   = getUTObiettiviMode
+
+function getUTAvg(criteria, years, res){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          ultraTriennale:{$avg:'$pendenti-ultra-triennali'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(data)
+  // })
+  return result
+}
+
+function getUTMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        ultraTriennale:{
+          $push:'$pendenti-ultra-triennali'
+        }
+      }
+    },
+    {
+      "$unwind":"$ultraTriennale"
+    },
+    {
+      "$sort":{
+        ultraTriennale:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "ultraTriennale":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "ultraTriennale":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        ultraTriennale:{
+          $push:"$ultraTriennale"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        //simpleClearance:1,
+        "beginValue":{
+          "$arrayElemAt":["$ultraTriennale","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$ultraTriennale","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+
+function getUTMode(criteria, years, res){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'agg':criteria,
+          'ann':'$anno',
+          ut:'$pendenti-ultra-triennali',
+        },
+        count:{
+            $sum: 1
+        }
+      }
+    },
+    {
+      $group:{
+        _id:{
+          aggregazione:'$_id.agg',
+          'anno':'$_id.ann',
+        },
+        utArray:{$push:{'ultraTriennale':'$_id.ut','count':'$count'}},
+        maxCount:{$max:'$count'}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        utAux:{
+          $filter:{
+            input: '$utArray',
+            as: 'pair',
+            cond:{$gte:['$$pair.count','$maxCount']}
+          }
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:{$arrayElemAt:['$utAux.ultraTriennale',0]}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+module.exports.getUTAvg    = getUTAvg
+module.exports.getUTMedian = getUTMedian
+module.exports.getUTMode   = getUTMode
+
+
+function getUTInterannualeByTribunale(metric,tribunale,criteria,year,callback){
+
+  switch(metric) {
+      case 'Average':
+          funct = getUTInterannualeAvg
+          break;
+      case 'Median':
+          funct = getUTInterannualeMedian
+          break;
+      case 'Mode':
+          funct = getUTInterannualeMode
+          break;
+      default:
+          funct = getUTInterannualeAvg
+  }
+
+  var partialRes = []
+  funct('$tribunale',year).toArray(function (err, data){
+    if (err) {
+      console.log(err)
+      callback(err,null)
+    }
+    for (index in data){
+      var doc = data[index]
+      if (doc['_id'].aggregazione == tribunale){
+        doc['_id'].anno = year
+        partialRes.push(doc)
+      }
+    }
+    //    var result = cr.formatClearance(data,"Average")
+
+    var filter
+    tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+      if (err) {
+        console.log(err)
+        callback(err,null)
+      }
+      for (index in data){
+        filter = data[index]
+      }
+      funct('$'+criteria,year)
+      .toArray(function (err, data){
+        if (err) {
+          console.log(err)
+          callback(err,null)
+        }
+        for (index in data){
+          if (data[index]['_id'].aggregazione == filter[criteria]){
+            data[index]['_id'].anno = year
+            partialRes.push(data[index])
+          }
+        }
+        callback(null,partialRes)
+      })
+    })
+  })
+}
+
+module.exports.getUTInterannualeByTribunale = getUTInterannualeByTribunale
+//
+// function getUTByTribunale(metric, tribunale,criteria,years,callback){
+//   aux = []
+//
+//   switch(metric) {
+//       case 'Average':
+//           funct = getUTAvg
+//           break;
+//       case 'Median':
+//           funct = getUTMedian
+//           break;
+//       case 'Mode':
+//           funct = getUTMode
+//           break;
+//       default:
+//           funct = getUTAvg
+//   }
+//
+//   funct('$tribunale',years).toArray(function (err, data){
+//     if (err) {
+//       console.log(err)
+//       return
+//     }
+//     for (index in data){
+//       var doc = data[index]
+//       if (doc['_id'].aggregazione == tribunale){
+//         aux.push(doc)
+//       }
+//     }
+//   //    var result = cr.formatClearance(data,"Average")
+//     var filter
+//     tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+//       if (err) {
+//         console.log(err)
+//         return
+//       }
+//       for (index in data){
+//         filter = data[index]
+//       }
+//       funct('$'+criteria,years).toArray(function (err, data){
+//         if (err) {
+//           console.log(err)
+//           return
+//         }
+//         for (index in data){
+//           if (data[index]['_id'].aggregazione == filter[criteria])
+//             aux.push(data[index])
+//         }
+//         // console.log(JSON.stringify(res))
+//         callback(null,aux)
+//       })
+//       //getClearanceRates(res)
+//     })
+//   })
+// }
+//
+// module.exports.getUTByTribunale = getUTByTribunale
