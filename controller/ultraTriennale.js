@@ -72,7 +72,7 @@ function formatUT(data,title){
 module.exports.formatUT = formatUT
 
 
-function getUTInterannualeAvg(criteria, year, res){
+function getUTInterannualeAvg(criteria, year){
   years = [year-1,year]
   // console.log(years)
 
@@ -185,7 +185,7 @@ function getUTInterannualeAvg(criteria, year, res){
   return result
 }
 
-function getUTInterannualeMedian(criteria, year, res){
+function getUTInterannualeMedian(criteria, year){
   years = [year-1,year]
   // console.log(years)
 
@@ -349,7 +349,7 @@ function getUTInterannualeMedian(criteria, year, res){
   return result
 }
 
-function getUTInterannualeMode(criteria, year, res){
+function getUTInterannualeMode(criteria, year){
   years = [year-1,year]
   // console.log(years)
 
