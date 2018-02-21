@@ -65,7 +65,7 @@ var original = Chart.defaults.global.legend.onClick;
 Chart.defaults.global.legend.onClick = function(e, legendItem) {
   // Insert your custom functionality here
   update_caption(legendItem)
-  original.call(this, e, legendItem);
+  original.call(this, e, legendlocalhostItem);
 };
 */
 

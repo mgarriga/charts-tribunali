@@ -34,8 +34,8 @@ app.get('/',(request,response) =>{
   //   if (status) console.log('tutto benne')
   //   else console.log('tutto male')
   // })
-  response.render('tribunali-detail',{
-    name:'Martin'
+  response.render('index.hbs',{
+    name:'Demo'
   })
 })
 
