@@ -1,6 +1,8 @@
 //const Chart = require('charts.js')
 
 // var templateString = $('#tabular-template').html()
+var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
+// var host      = 'http://localhost:3000/'
 
 function changeHeader(){
   var optionSelected = $('#indicator option:selected').val();
@@ -71,7 +73,7 @@ function fetchData(metric,callback){
   var title = indicatorText + " " + metric + " for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
   var type  = 'bar' //TODO get the type of graphic from select in the page
 
-  var host      = 'http://localhost:3000/'
+
   var urlAddr   = indicator + metric
   var params    = '?criteria=' + aggregate +'&'+ $.param(yearsParam)
   var urlString = host + urlAddr + params

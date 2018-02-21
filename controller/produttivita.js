@@ -247,6 +247,9 @@ function getProduttivitaMagistratoMode(criteria, years, res){
         _id:1,
         produttivita:{$arrayElemAt:['$pAux.produttivita',0]}
       }
+    },
+    {
+      $sort:{_id:1}
     }
   ])
   return result

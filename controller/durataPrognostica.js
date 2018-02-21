@@ -255,6 +255,9 @@ function getDurataPrognosticaMode(criteria, years, res){
         _id:1,
         durataPrognostica:{$arrayElemAt:['$dpAux.durataPrognostica',0]}
       }
+    },
+    {
+      $sort:{_id:1}
     }
   ])
   return result

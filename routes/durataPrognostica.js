@@ -45,6 +45,47 @@ router.get("/DurataPrognosticaByTribunaleMode", (req,res)=>{
   })
 })
 
+
+router.get("/DurataPrognosticaAverage", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getDurataPrognostica('Average',criteria,years,function(result){
+      res.json(result)
+  })
+})
+
+router.get("/DurataPrognosticaMedian", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getDurataPrognostica('Median',criteria,years,function(result){
+      res.json(result)
+  })
+})
+
+router.get("/DurataPrognosticaMode", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getDurataPrognostica('Mode',criteria,years,function(result){
+      res.json(result)
+  })
+})
+
+
 function getDurataPrognosticaByTribunale(metric, tribunale,criteria,years,callback){
   partial = []
 
@@ -99,5 +140,39 @@ function getDurataPrognosticaByTribunale(metric, tribunale,criteria,years,callba
   })
 }
 
+
+function getDurataPrognostica(metric,criteria,years,callback){
+  var partial = []
+  var title   = ""
+  switch(metric) {
+      case 'Average':
+          funct = dp.getDurataPrognosticaAvg
+          title = 'Media'
+          break;
+      case 'Median':
+          funct = dp.getDurataPrognosticaMedian
+          title = 'Mediana'
+          break;
+      case 'Mode':
+          funct = dp.getDurataPrognosticaMode
+          title = 'Moda'
+          break;
+      default:
+          funct = dp.getDurataPrognosticaAvg
+          title = 'Media'
+  }
+      funct('$'+criteria,years).toArray(function (err, data){
+        if (err) {
+          console.log(err)
+          return
+        }
+        for (index in data){
+          // if (data[index]['_id'].aggregazione == filter[criteria])
+          partial.push(data[index])
+        }
+        res = dp.formatDP(partial," in Giorni " + title)
+        callback(res)
+      })
+}
 
 module.exports = router

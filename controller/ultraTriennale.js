@@ -1142,6 +1142,64 @@ function getUTInterannualeByTribunale(metric,tribunale,criteria,year,callback){
   })
 }
 
+function getUTInterannuale(metric,criteria,year,callback){
+  var partialRes = []
+  switch(metric) {
+      case 'Average':
+          funct = getUTInterannualeAvg
+          break;
+      case 'Median':
+          funct = getUTInterannualeMedian
+          break;
+      case 'Mode':
+          funct = getUTInterannualeMode
+          break;
+      default:
+          funct = getUTInterannualeAvg
+  }
+  //
+  // funct('$tribunale',year).toArray(function (err, data){
+  //   if (err) {
+  //     console.log(err)
+  //     callback(err,null)
+  //   }
+  //   for (index in data){
+  //     var doc = data[index]
+  //     if (doc['_id'].aggregazione == tribunale){
+  //       doc['_id'].anno = year
+  //       partialRes.push(doc)
+  //     }
+  //   }
+  //   //    var result = cr.formatClearance(data,"Average")
+  //
+  //   var filter
+  //   tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+  //     if (err) {
+  //       console.log(err)
+  //       callback(err,null)
+  //     }
+  //     for (index in data){
+  //       filter = data[index]
+  //     }
+      funct('$'+criteria,year)
+      .toArray(function (err, data){
+        if (err) {
+          console.log(err)
+          callback(err,null)
+        }
+        for (index in data){
+          // if (data[index]['_id'].aggregazione == filter[criteria]){
+            data[index]['_id'].anno = year
+            partialRes.push(data[index])
+          // }
+        }
+        callback(null,partialRes)
+      })
+  //   })
+  // })
+}
+
+module.exports.getUTInterannuale            = getUTInterannuale
 module.exports.getUTInterannualeByTribunale = getUTInterannualeByTribunale
 //
 // function getUTByTribunale(metric, tribunale,criteria,years,callback){

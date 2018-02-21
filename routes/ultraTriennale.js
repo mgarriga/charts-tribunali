@@ -195,6 +195,226 @@ router.get("/UTInterannualeByTribunaleMode", (req,res)=>{
   });
 })
 
+router.get("/UTSuPendentiAverage", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getUTSuPendenti('Average',criteria,years,function(result){
+      res.json(result)
+  })
+})
+
+router.get("/UTSuPendentiMedian", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getUTSuPendenti('Median',criteria,years,function(result){
+      res.json(result)
+  })
+})
+
+router.get("/UTSuPendentiMode", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  getUTSuPendenti('Mode',criteria,years,function(result){
+      res.json(result)
+  })
+})
+
+router.get("/UTObiettiviAverage", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  var results = []
+  getUTSuPendenti('Average',criteria,years,function(result1){
+      results.push(result1)
+    getUTObiettivi('Average',criteria,years,function(result2){
+      results.push(result2)
+      utils.joinResults(results,function(result){
+        res.json(result)
+      })
+    })
+  })
+})
+
+router.get("/UTObiettiviMedian", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  var results = []
+  getUTSuPendenti('Median',criteria,years,function(result1){
+      results.push(result1)
+    getUTObiettivi('Median',criteria,years,function(result2){
+      results.push(result2)
+      utils.joinResults(results,function(result){
+        res.json(result)
+      })
+    })
+  })
+})
+
+router.get("/UTObiettiviMode", (req,res)=>{
+
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+
+  var years = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  var results = []
+  getUTSuPendenti('Mode',criteria,years,function(result1){
+      results.push(result1)
+    getUTObiettivi('Mode',criteria,years,function(result2){
+      results.push(result2)
+      utils.joinResults(results,function(result){
+        res.json(result)
+      })
+    })
+  })
+})
+
+router.get("/UTInterannualeAverage", (req,res)=>{
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years     = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  partial = []
+  let requests = years.map((year) => {
+    return new Promise((resolve,reject) => {
+      // console.log(year)
+      ut.getUTInterannuale('Average',criteria,year,function(err, result){
+          if (err){
+            console.log(err)
+            reject(err)
+          }
+          partial = partial.concat(result)
+          // console.log(JSON.stringify(partial))
+          resolve(true)
+      })
+    })
+  })
+  Promise.all(requests).then(() => {
+    // console.log('done')
+    var result = ut.formatUT(partial,"Interannuale Media")
+    res.json(result)
+  },(error)=>{
+    console.log(error)
+  });
+})
+
+router.get("/UTInterannualeMedian", (req,res)=>{
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years     = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  partial = []
+  let requests = years.map((year) => {
+    return new Promise((resolve,reject) => {
+      // console.log(year)
+      ut.getUTInterannuale('Median',criteria,year,function(err, result){
+          if (err){
+            console.log(err)
+            reject(err)
+          }
+          partial = partial.concat(result)
+          // console.log(JSON.stringify(partial))
+          resolve(true)
+      })
+    })
+  })
+  Promise.all(requests).then(() => {
+    // console.log('done')
+    var result = ut.formatUT(partial,"Interannuale Mediana")
+    res.json(result)
+  },(error)=>{
+    console.log(error)
+  });
+})
+
+router.get("/UTInterannualeMode", (req,res)=>{
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years     = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  partial = []
+  let requests = years.map((year) => {
+    return new Promise((resolve,reject) => {
+      // console.log(year)
+      ut.getUTInterannuale('Mode',criteria,year,function(err, result){
+          if (err){
+            console.log(err)
+            reject(err)
+          }
+          partial = partial.concat(result)
+          // console.log(JSON.stringify(partial))
+          resolve(true)
+      })
+    })
+  })
+  Promise.all(requests).then(() => {
+    // console.log('done')
+    var result = ut.formatUT(partial,"Interannuale Moda")
+    res.json(result)
+  },(error)=>{
+    console.log(error)
+  });
+})
+
+function getUTSuPendenti(metric,criteria,years,callback){
+  var partial = []
+  var title = ""
+  switch(metric) {
+      case 'Average':
+          funct = ut.getUTSuPendentiAvg
+          title = "Media"
+          break;
+      case 'Median':
+          funct = ut.getUTSuPendentiMedian
+          title = "Mediana"
+          break;
+      case 'Mode':
+          funct = ut.getUTSuPendentiMode
+          title = "Moda"
+          break;
+      default:
+          funct = ut.getUTSuPendentiAvg
+          title = "Media"
+  }
+  funct('$'+criteria,years).toArray(function (err, data){
+    if (err) {
+      console.log(err)
+      return
+    }
+    for (index in data){
+      partial.push(data[index])
+    }
+    res = ut.formatUT(partial,"Su Pendenti " + title)
+    callback(res)
+  })
+}
+
+
 function getUTSuPendentiByTribunale(metric, tribunale,criteria,years,callback){
   partial = []
 
@@ -248,6 +468,65 @@ function getUTSuPendentiByTribunale(metric, tribunale,criteria,years,callback){
     })
   })
 }
+
+function getUTObiettivi(metric,criteria,years,callback){
+  var title   = ""
+  var partial = []
+  switch(metric) {
+      case 'Average':
+          funct = ut.getUTObiettiviAvg
+          title = "Media"
+          break;
+      case 'Median':
+          funct = ut.getUTObiettiviMedian
+          title = "Mediana"
+          break;
+      case 'Mode':
+          funct = ut.getUTObiettiviMode
+          title = "Moda"
+          break;
+      default:
+          funct = ut.getUTObiettiviAvg
+          title = "Media"
+  }
+
+  // tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   var filter
+  //   for (index in data){
+  //     filter = data[index]
+  //   }
+  //   partial = []
+  //   funct('$tribunale',years,res).toArray(function (err,data){
+  //     if (err){
+  //       console.log(err)
+  //       return
+  //     }
+  //     for (index in data){
+  //       var doc = data[index]
+  //       if (doc['_id'].aggregazione == tribunale){
+  //         partial.push(doc)
+  //       }
+  //     }
+      funct('$'+criteria,years,res).toArray(function (err, data){
+        if (err) {
+          console.log(err)
+          return
+        }
+        for (index in data){
+          // if (data[index]['_id'].aggregazione == filter[criteria])
+          partial.push(data[index])
+        }
+        var res = ut.formatUT(partial," Obiettivi " + title)
+        callback(res)
+      })
+  //   })
+  // })
+}
+
 
 function getUTObiettiviByTribunale(metric, tribunale,criteria,years,callback){
   switch(metric) {
