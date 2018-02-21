@@ -59,7 +59,7 @@ function formatUT(data,title){
             // suggestedMax: 1,
             stepSize: 10,
             // fixedStepSize:0.1,
-            min: -10
+            // min: -10
           }
         }]
       }

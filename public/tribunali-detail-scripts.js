@@ -2,7 +2,7 @@
 var templateTribunali = $('#tribunali-fill').html()
 $(function(){
   $.ajax({
-  url: 'http://localhost:3000/tribunali',
+  url: 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/tribunali',
   dataType: 'json',
   type: 'GET',
     success: function(data) {
@@ -68,7 +68,7 @@ function fetchData(metric,callback){
   var title = indicatorText + " " + metric + " for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
   var type  = 'bar' //TODO get the type of graphic from select in the page
 
-  var host      = 'http://localhost:3000/'
+  var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
   var urlAddr   = indicator + 'ByTribunale' + metric
   var params    = '?tribunale=' + tribunale + '&criteria=' + aggregate +'&'+ $.param(yearsParam)
   var urlString = host + urlAddr + params
