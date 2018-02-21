@@ -56,10 +56,9 @@ function formatClearance(data,title){
             //beginAtZero: true,
             suggestedMin: 0,
             // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
-            // suggestedMax: 1,
+            suggestedMax: 1,
             stepSize: 0.1,
             // fixedStepSize:0.1,
-            min: -0.1
           }
         }]
       }
@@ -240,6 +239,9 @@ function getClearanceMode(criteria, years, res){
         _id:1,
         clearance:{$arrayElemAt:['$clearanceAux.clearance',0]}
       }
+    },
+    {
+      $sort:{_id:1}
     }
   ])
   return result

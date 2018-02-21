@@ -194,7 +194,6 @@ router.get("/clearanceRateFullByTribunaleAverage", (req,res)=>{
   //   year = years[index]
   // }
 
-  //TODO llamar dentro del for para cada año
   let requests = years.map((year) => {
       return new Promise((resolve,reject) => {
 //        asyncFunction(year, resolve);
