@@ -28,7 +28,6 @@ router.get("/DomandaGiustiziaByTribunaleAverage", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
     var result = dg.formatDG(partial,"Variazione (%) Media")
     res.json(result)
   },(error)=>{
@@ -269,7 +268,6 @@ router.get("/DomandaGiustiziaAverage", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
     var result = dg.formatDG(partial,"Variazione (%) Media")
     res.json(result)
   },(error)=>{
@@ -299,7 +297,6 @@ router.get("/DomandaGiustiziaMedian", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
     var result = dg.formatDG(partial,"Variazione (%) Mediana")
     res.json(result)
   },(error)=>{
@@ -329,7 +326,6 @@ router.get("/DomandaGiustiziaMode", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
     var result = dg.formatDG(partial,"Variazione (%) Moda")
     res.json(result)
   },(error)=>{
@@ -529,9 +525,6 @@ router.get("/UTDomandaMode", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
-    // console.log('calling formatUT ' +  JSON.stringify(partial2))
-    // console.log('calling formatDG ' + JSON.stringify(partial))
     var resultDG  = dg.formatDG(partial,"Variazione Moda (%)")
     var resultUT = ut.formatUT(partial2," Interannuale Moda (%)")
     var results = []
@@ -562,29 +555,6 @@ function getDomandaGiustizia(metric,criteria,year,callback){
   }
   var partialRes = []
 
-  // funct('$tribunale',year).toArray(function (err, data){
-  //   if (err) {
-  //     console.log(err)
-  //     callback(err,null)
-  //   }
-  //   for (index in data){
-  //     var doc = data[index]
-  //     if (doc['_id'].aggregazione == tribunale){
-  //       doc['_id'].anno = year
-  //       partialRes.push(doc)
-  //     }
-  //   }
-  //   //    var result = cr.formatClearance(data,"Average")
-  //
-  //   var filter
-  //   tr.getTribunaleDetail(tribunale).toArray(function(err,data){
-  //     if (err) {
-  //       console.log(err)
-  //       callback(err,null)
-  //     }
-  //     for (index in data){
-  //       filter = data[index]
-  //     }
       funct('$'+criteria,year)
       .toArray(function (err, data){
         if (err) {

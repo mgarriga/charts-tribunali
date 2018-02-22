@@ -15,6 +15,7 @@ function formatDG(data,title){
   //   return "rgb(" + r + "," + g + "," + b + ")";
   // };
 
+  data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
   for (index in data){
        var doc = data[index]
        var category = doc['_id'].aggregazione

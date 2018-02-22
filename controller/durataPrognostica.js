@@ -17,6 +17,7 @@ function formatDP(data,title){
   //   var b = Math.floor(Math.random() * 255);
   //   return "rgb(" + r + "," + g + "," + b + ")";
   // };
+  data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
 
   for (index in data){
        var doc = data[index]

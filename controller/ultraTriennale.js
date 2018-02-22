@@ -18,6 +18,7 @@ function formatUT(data,title){
   //   return "rgb(" + r + "," + g + "," + b + ")";
   // };
 
+  data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
   for (index in data){
        var doc = data[index]
        var category = doc['_id'].aggregazione
@@ -1157,30 +1158,6 @@ function getUTInterannuale(metric,criteria,year,callback){
       default:
           funct = getUTInterannualeAvg
   }
-  //
-  // funct('$tribunale',year).toArray(function (err, data){
-  //   if (err) {
-  //     console.log(err)
-  //     callback(err,null)
-  //   }
-  //   for (index in data){
-  //     var doc = data[index]
-  //     if (doc['_id'].aggregazione == tribunale){
-  //       doc['_id'].anno = year
-  //       partialRes.push(doc)
-  //     }
-  //   }
-  //   //    var result = cr.formatClearance(data,"Average")
-  //
-  //   var filter
-  //   tr.getTribunaleDetail(tribunale).toArray(function(err,data){
-  //     if (err) {
-  //       console.log(err)
-  //       callback(err,null)
-  //     }
-  //     for (index in data){
-  //       filter = data[index]
-  //     }
       funct('$'+criteria,year)
       .toArray(function (err, data){
         if (err) {
