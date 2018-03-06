@@ -61,6 +61,10 @@ function formatDG(data,title){
           }
         }]
       }
+    },
+    tabularData:{
+      'labels':categoryArray,
+      'datasets':datasets
     }
   }
   return response

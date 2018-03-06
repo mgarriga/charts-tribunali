@@ -8,7 +8,9 @@ function formatUT(data,title){
 
   // values array
   var utArray = []
-
+  var rawNums = []
+  var tabData = []
+  var labels  = []
   // //TODO se ve bastaaante feo el randomcolor
   // var color = [];
   // var dynamicColors = function() {
@@ -27,9 +29,11 @@ function formatUT(data,title){
 
        var ut = doc['ultraTriennale']
        categoryArray.push(category)
+       // console.log(doc)
        utArray.push(parseFloat(ut.toPrecision(3)))
-       // color.push(dynamicColors())
-    }
+
+
+  }
   var datasets=[
     {
       'label':'Ultra Triennale ' + title,
@@ -64,10 +68,13 @@ function formatUT(data,title){
           }
         }]
       }
+    },
+    tabularData:{
+      'labels':categoryArray,
+      'datasets':datasets
     }
   }
   return response
-//  console.log(JSON.stringify(response))
 }
 
 module.exports.formatUT = formatUT
@@ -76,7 +83,6 @@ module.exports.formatUT = formatUT
 function getUTInterannualeAvg(criteria, year){
   years = [year-1,year]
   // console.log(years)
-
   result = db.collection("siecic").aggregate([
     {
       $match:{
@@ -505,13 +511,13 @@ function getUTSuPendentiAvg(criteria, years){
             'aggregazione':criteria,
             'anno':'$anno'
           },
-          ultraTriennale:{$avg:{$divide:["$pendenti-ultra-triennali","$pendenti"]}}
+          ultraTriennale:{$avg:{$divide:["$pendenti-ultra-triennali","$pendenti"]}},
       }
     },
     {
       $project:{
         _id:1,
-        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
+        ultraTriennale:round({$multiply:['$ultraTriennale',100]},0),
       }
     },
     {
@@ -520,6 +526,8 @@ function getUTSuPendentiAvg(criteria, years){
   ])
   return result
 }
+
+
 
 function getUTSuPendentiMedian(criteria, years, res){
   var result = db.collection("siecic").aggregate([
@@ -539,7 +547,7 @@ function getUTSuPendentiMedian(criteria, years, res){
         },
         ultraTriennale:{
           $push:{$divide:["$pendenti-ultra-triennali","$pendenti"]}
-        }
+        },
       }
     },
     {
@@ -591,7 +599,6 @@ function getUTSuPendentiMedian(criteria, years, res){
     {
       $project:{
         _id:1,
-        //simpleClearance:1,
         "beginValue":{
           "$arrayElemAt":["$ultraTriennale","$high"]
         },
@@ -609,6 +616,14 @@ function getUTSuPendentiMedian(criteria, years, res){
       }
     },
     {
+      $group:{
+        _id:'$_id',
+        ultraTriennale:{
+          $avg:"$ultraTriennale"
+        },
+      }
+    },
+    {
       $project:{
         _id:1,
         ultraTriennale:round({$multiply:['$ultraTriennale',100]},0)
@@ -618,6 +633,13 @@ function getUTSuPendentiMedian(criteria, years, res){
       $sort:{_id:1}
     }
   ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(JSON.stringify(data))
+  // })
   return result
 }
 
@@ -685,6 +707,329 @@ function getUTSuPendentiMode(criteria, years, res){
 module.exports.getUTSuPendentiAvg    = getUTSuPendentiAvg
 module.exports.getUTSuPendentiMedian = getUTSuPendentiMedian
 module.exports.getUTSuPendentiMode   = getUTSuPendentiMode
+
+
+function getPendentiUTAvg(criteria, years){
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          rawNumbers:{$push:{'pendenti-ultra-triennali':'$pendenti-ultra-triennali','pendenti':'$pendenti'}},
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "pendentiUltraTriennali": {
+            "$divide": [
+                { // expression returns total
+                    "$reduce": {
+                        "input": "$rawNumbers",
+                        "initialValue": 0,
+                        "in": { "$add": ["$$value", "$$this.pendenti-ultra-triennali"] }
+                    }
+                },
+                { // expression returns ratings count
+                    "$cond": [
+                        { "$ne": [ { "$size": "$rawNumbers" }, 0 ] },
+                        { "$size": "$rawNumbers" },
+                        1
+                    ]
+                }
+            ]
+        },
+        "pendenti": {
+            "$divide": [
+                { // expression returns total
+                    "$reduce": {
+                        "input": "$rawNumbers",
+                        "initialValue": 0,
+                        "in": { "$add": ["$$value", "$$this.pendenti"] }
+                    }
+                },
+                { // expression returns ratings count
+                    "$cond": [
+                        { "$ne": [ { "$size": "$rawNumbers" }, 0 ] },
+                        { "$size": "$rawNumbers" },
+                        1
+                    ]
+                }
+            ]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        // ultraTriennale:"",
+        rawNumbers:[
+          {'label':'Pendenti UT','data':round('$pendentiUltraTriennali',0)},
+          {'label':'Pendenti','data':   round('$pendenti',0)},
+        ]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log("ERROR")
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log("HOLA")
+  //   console.log(data)
+  // })
+  return result
+}
+
+module.exports.getPendentiUTAvg = getPendentiUTAvg
+
+
+function getPendentiUTMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        pendentiUT:{
+          $push:"$pendenti-ultra-triennali"
+        },
+      }
+    },
+    {
+      "$unwind":"$pendentiUT"
+    },
+    {
+      "$sort":{
+        pendentiUT:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "pendentiUT":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "pendentiUT":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        pendentiUT:{
+          $push:"$pendentiUT"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "beginValue":{
+          "$arrayElemAt":["$pendentiUT","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$pendentiUT","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        pendentiUT:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $group:{
+        _id:'$_id',
+        pendentiUT:{
+          $avg:"$pendentiUT"
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[
+          {'label':'Pendenti UT','data':round('$pendentiUT',0)},
+        ]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(JSON.stringify(data))
+  // })
+  return result
+}
+
+function getPendentiMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        pendenti:{
+          $push:"$pendenti"
+        },
+      }
+    },
+    {
+      "$unwind":"$pendenti"
+    },
+    {
+      "$sort":{
+        pendenti:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "pendenti":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "pendenti":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        pendenti:{
+          $push:"$pendenti"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "beginValue":{
+          "$arrayElemAt":["$pendenti","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$pendenti","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        pendenti:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $group:{
+        _id:'$_id',
+        pendenti:{
+          $avg:"$pendenti"
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[
+          {'label':'Pendenti','data':round('$pendenti',0)},
+        ]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(JSON.stringify(data))
+  // })
+  return result
+}
+
+module.exports.getPendentiUTMedian = getPendentiUTMedian
+module.exports.getPendentiMedian   = getPendentiMedian
+
 
 function getUTObiettiviAvg(criteria, years, res){
 

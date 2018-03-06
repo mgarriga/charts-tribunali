@@ -65,6 +65,10 @@ function formatDP(data,title){
           }
         }]
       }
+    },
+    tabularData:{
+      'labels':categoryArray,
+      'datasets':datasets
     }
   }
   return response
