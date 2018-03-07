@@ -8,7 +8,7 @@ function formatClearance(data,title){
 
   // values array
   var clearanceArray = []
-
+  var rawNums =
   // //TODO se ve bastaaante feo el randomcolor
   // var color = [];
   // var dynamicColors = function() {
@@ -75,7 +75,7 @@ function formatClearance(data,title){
 
 module.exports.formatClearance = formatClearance
 
-function getClearanceMedian(criteria, years, res){
+function getClearanceMedian(criteria, years){
   var result = db.collection("siecic").aggregate([
     {
       $match:{
@@ -171,7 +171,7 @@ function getClearanceMedian(criteria, years, res){
 
 module.exports.getClearanceMedian = getClearanceMedian
 
-function getClearanceAvg(criteria, years, res){
+function getClearanceAvg(criteria, years){
 
   result = db.collection("siecic").aggregate([
     {
@@ -197,7 +197,276 @@ function getClearanceAvg(criteria, years, res){
 
 module.exports.getClearanceAvg = getClearanceAvg
 
-function getClearanceMode(criteria, years, res){
+function getDefinitiAvg(criteria, years){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          definiti:{$avg:"$definiti"}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[{'label':'Definiti','data':round('$definiti',0)}]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+module.exports.getDefinitiAvg = getDefinitiAvg
+
+function getDefinitiMedian(criteria, years){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        definiti:{
+          $push:"$definiti"
+        }
+      }
+    },
+    {
+      "$unwind":"$definiti"
+    },
+    {
+      "$sort":{
+        definiti:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "definiti":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "definiti":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        definiti:{
+          $push:"$definiti"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        //simpleClearance:1,
+        "beginValue":{
+          "$arrayElemAt":["$definiti","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$definiti","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "definiti":{
+          "$avg":["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[{'label':'Definiti','data':round('$definiti',0)}]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+module.exports.getDefinitiMedian = getDefinitiMedian
+
+
+function getIscrittiAvg(criteria, years){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          iscritti:{$avg:"$iscritti"}
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[{'label':'Iscritti','data':round('$iscritti',0)}]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+module.exports.getIscrittiAvg = getIscrittiAvg
+
+function getIscrittiMedian(criteria, years){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        iscritti:{
+          $push:"$iscritti"
+        }
+      }
+    },
+    {
+      "$unwind":"$iscritti"
+    },
+    {
+      "$sort":{
+        iscritti:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "iscritti":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "iscritti":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        iscritti:{
+          $push:"$iscritti"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        //simpleClearance:1,
+        "beginValue":{
+          "$arrayElemAt":["$iscritti","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$iscritti","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "iscritti":{
+          "$avg":["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[{'label':'Iscritti','data':round('$iscritti',0)}]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+module.exports.getIscrittiMedian = getIscrittiMedian
+
+function getClearanceMode(criteria, years){
 
   result = db.collection("siecic").aggregate([
     {
@@ -254,7 +523,7 @@ function getClearanceMode(criteria, years, res){
 
 module.exports.getClearanceMode = getClearanceMode
 
-function getFullClearanceAvg(criteria, year, res){
+function getFullClearanceAvg(criteria, year){
   years = [year-1,year]
   // console.log(years)
 
@@ -272,8 +541,8 @@ function getFullClearanceAvg(criteria, year, res){
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
             'area':'$area'
-            //'aggregazione':criteria,
             //'anno':'$anno'
+            //'aggregazione':criteria,
           },
           definitiAct:{
             $push:{$cond:[{$eq:['$anno',year]},'$definiti',false]}
@@ -343,7 +612,7 @@ function getFullClearanceAvg(criteria, year, res){
 
 module.exports.getFullClearanceAvg =  getFullClearanceAvg
 
-function getFullClearanceMedian(criteria, year, res){
+function getFullClearanceMedian(criteria, year){
   years = [year-1,year]
   // console.log(years)
 
@@ -487,7 +756,7 @@ function getFullClearanceMedian(criteria, year, res){
 
 module.exports.getFullClearanceMedian =  getFullClearanceMedian
 
-function getFullClearanceMode(criteria, year, res){
+function getFullClearanceMode(criteria, year){
   years = [year-1,year]
   // console.log(years)
 

@@ -183,8 +183,11 @@ router.get("/UTInterannualeByTribunaleMedian", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  var partial,results = []
-  var result1,result2,result3 = null
+  var partial = []
+  var results = []
+  var result1 = null
+  var result2 = null
+  var result3 = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
@@ -848,7 +851,7 @@ function getUTObiettiviByTribunale(metric, tribunale,criteria,years,callback){
         }
         for (index in data){
           if (data[index]['_id'].aggregazione == filter[criteria])
-          partial.push(data[index])
+            partial.push(data[index])
         }
         var res = ut.formatUT(partial," Obiettivi (%) " + title)
         callback(res)
