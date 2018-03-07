@@ -311,12 +311,16 @@ router.get("/UTObiettiviAverage", (req,res)=>{
     return parseInt(year)
   })
   var results = []
+  var result1, result2, result3 = null
   getUTSuPendenti('Average',criteria,years,function(result1){
       results.push(result1)
     getUTObiettivi('Average',criteria,years,function(result2){
       results.push(result2)
-      utils.joinResults(results,function(result){
-        res.json(result)
+      getPendentiUT('Average',criteria,years,function(result3){
+        results.push(result3)
+        utils.joinResults(results,function(result){
+          res.json(result)
+        })
       })
     })
   })
@@ -331,12 +335,19 @@ router.get("/UTObiettiviMedian", (req,res)=>{
     return parseInt(year)
   })
   var results = []
+  var result1, result2, result3, result4 = null
   getUTSuPendenti('Median',criteria,years,function(result1){
       results.push(result1)
     getUTObiettivi('Median',criteria,years,function(result2){
       results.push(result2)
-      utils.joinResults(results,function(result){
-        res.json(result)
+      getPendentiUT('Median',criteria,years,function(result3){
+        results.push(result3)
+        getPendenti('Median',criteria,years,function(result4){
+          results.push(result4)
+          utils.joinResults(results,function(result){
+            res.json(result)
+          })
+        })
       })
     })
   })
@@ -368,28 +379,37 @@ router.get("/UTInterannualeAverage", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial = []
+  var partial = []
+  var results = []
+  var result1, result2, result3 = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      ut.getUTInterannuale('Average',criteria,year,function(err, result){
+      ut.getUTInterannuale('Average',criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-          partial = partial.concat(result)
+          partial = partial.concat(result1)
           // console.log(JSON.stringify(partial))
           resolve(true)
       })
     })
   })
   Promise.all(requests).then(() => {
+
+    getPendentiUT('Average',criteria,years,function(result2){
+      results.push(result2)
+      var formatRes = ut.formatUT(partial,"Interannuale Media (%)")
+      results.splice(0,0,formatRes)
+      utils.joinResults(results,function(result){
+        res.json(result)
+      })
+    })
     // console.log('done')
-    var result = ut.formatUT(partial,"Interannuale Media")
-    res.json(result)
   },(error)=>{
     console.log(error)
-  });
+  })
 })
 
 router.get("/UTInterannualeMedian", (req,res)=>{
@@ -398,28 +418,39 @@ router.get("/UTInterannualeMedian", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial = []
+  var partial = []
+  var results = []
+  var result1, result2, result3 = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      ut.getUTInterannuale('Median',criteria,year,function(err, result){
+      ut.getUTInterannuale('Median',criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-          partial = partial.concat(result)
+          partial = partial.concat(result1)
           // console.log(JSON.stringify(partial))
           resolve(true)
       })
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
-    var result = ut.formatUT(partial,"Interannuale Mediana")
-    res.json(result)
+
+    getPendentiUT('Median',criteria,years,function(result2){
+      results.push(result2)
+      getPendenti('Median',criteria,years,function(result3){
+        results.push(result3)
+        var formatRes = ut.formatUT(partial,'Interannuale Mediana (%)')
+        results.splice(0,0,formatRes)
+        utils.joinResults(results,function(result){
+          res.json(result)
+        })
+      })
+    })
   },(error)=>{
     console.log(error)
-  });
+  })
 })
 
 router.get("/UTInterannualeMode", (req,res)=>{
@@ -449,7 +480,7 @@ router.get("/UTInterannualeMode", (req,res)=>{
     res.json(result)
   },(error)=>{
     console.log(error)
-  });
+  })
 })
 
 function getUTSuPendenti(metric,criteria,years,callback){
@@ -480,7 +511,7 @@ function getUTSuPendenti(metric,criteria,years,callback){
     for (index in data){
       partial.push(data[index])
     }
-    res = ut.formatUT(partial,"Su Pendenti " + title)
+    res = ut.formatUT(partial,"Su Pendenti (%) " + title)
     callback(res)
   })
 }
@@ -762,7 +793,7 @@ function getUTObiettivi(metric,criteria,years,callback){
           // if (data[index]['_id'].aggregazione == filter[criteria])
           partial.push(data[index])
         }
-        var res = ut.formatUT(partial," Obiettivi " + title)
+        var res = ut.formatUT(partial," Obiettivi (%) " + title)
         callback(res)
       })
   //   })
