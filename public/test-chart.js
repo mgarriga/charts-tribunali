@@ -1,8 +1,8 @@
 //const Chart = require('charts.js')
 
 // var templateString = $('#tabular-template').html()
-var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
-// var host      = 'http://localhost:3000/'
+// var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
+ var host      = 'http://localhost:3000/'
 
 function changeHeader(){
   var optionSelected = $('#indicator option:selected').val();
@@ -89,7 +89,7 @@ function fetchData(metric,callback){
         //console.log("hola" + JSON.stringify(data))
         //console.log($("#tabular-template").html())
         var template = Handlebars.compile(templateString)
-        $("#table-location"+metric).html(template(data['data']))
+        $("#table-location"+metric).html(template(data['tabularData']))
         drawChart(data,title,metric,type)
         if (typeof callback === "function") callback(true)
       },

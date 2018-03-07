@@ -73,12 +73,19 @@ router.get("/UTObiettiviByTribunaleAverage", (req,res)=>{
     return parseInt(year)
   })
   var results = []
+  var result1 = null
+  var result2 = null
+  var result3 = null
+
   getUTSuPendentiByTribunale('Average', tribunale,criteria,years,function(result1){
       results.push(result1)
     getUTObiettiviByTribunale('Average',tribunale, criteria,years,function(result2){
       results.push(result2)
-      utils.joinResults(results,function(result){
-        res.json(result)
+      getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result3){
+        results.push(result3)
+        utils.joinResults(results,function(result){
+          res.json(result)
+        })
       })
     })
   })
@@ -93,12 +100,19 @@ router.get("/UTObiettiviByTribunaleMedian", (req,res)=>{
     return parseInt(year)
   })
   results = []
+  var result1,result2,result3,result4 = null
   getUTSuPendentiByTribunale('Median', tribunale,criteria,years,function(result1){
       results.push(result1)
     getUTObiettiviByTribunale('Median',tribunale, criteria,years,function(result2){
       results.push(result2)
-      utils.joinResults(results, function(result){
-        res.json(result)
+      getPendentiUTByTribunale('Median',tribunale,criteria,years,function(result3){
+        results.push(result3)
+        getPendentiByTribunale('Median',tribunale,criteria,years,function(result4){
+          results.push(result4)
+          utils.joinResults(results, function(result){
+            res.json(result)
+          })
+        })
       })
     })
   })
@@ -169,11 +183,8 @@ router.get("/UTInterannualeByTribunaleMedian", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  var partial = []
-  var results = []
-  var result1 = null
-  var result2 = null
-  var result3 = null
+  var partial,results = []
+  var result1,result2,result3 = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
@@ -244,20 +255,38 @@ router.get("/UTSuPendentiAverage", (req,res)=>{
   var years = req.query.years.map(function(year){
     return parseInt(year)
   })
-  getUTSuPendenti('Average',criteria,years,function(result){
-      res.json(result)
+  var result1, result2 = null
+  var results          = []
+  getUTSuPendenti('Average',criteria,years,function(result1){
+    results.push(result1)
+    getPendentiUT('Average',criteria,years,function(result2){
+      results.push(result2)
+      utils.joinResults(results,function(result){
+        res.json(result)
+      })
+    })
   })
 })
 
 router.get("/UTSuPendentiMedian", (req,res)=>{
 
-  // var tribunale = req.query.tribunale
   var criteria  = req.query.criteria
   var years = req.query.years.map(function(year){
     return parseInt(year)
   })
-  getUTSuPendenti('Median',criteria,years,function(result){
-      res.json(result)
+  var results = []
+  var result1, result2, result3 = null
+  getUTSuPendenti('Median',criteria,years,function(result1){
+    results.push(result1)
+    getPendentiUT('Median',criteria,years,function(result2){
+      results.push(result2)
+      getPendenti('Median',criteria,years,function(result3){
+        results.push(result3)
+        utils.joinResults(results,function(result){
+          res.json(result)
+        })
+      })
+    })
   })
 })
 
@@ -637,6 +666,73 @@ function getPendentiByTribunale(metric,tribunale,criteria,years,callback){
   })
 }
 
+function getPendentiUT(metric,criteria,years,callback){
+  var partial = []
+  var title = ""
+  switch(metric) {
+      case 'Average':
+          funct   = ut.getPendentiUTAvg
+          title   = 'Media'
+          break;
+      case 'Median':
+          funct   = ut.getPendentiUTMedian
+          title   = 'Mediana'
+          break;
+      case 'Mode':
+          funct   = ut.getPendentiUTAvg
+          title   = 'Moda'
+          break;
+      default:
+          funct   = ut.getPendentiUTAvg
+          title   = 'Media'
+  }
+  funct('$'+criteria,years).toArray(function (err, data){
+    if (err) {
+      console.log(err)
+      return
+    }
+    for (index in data){
+      partial.push(data[index])
+    }
+    res = utils.formatTable(partial,"Pendenti Ultra Triennali " + title)
+    callback(res)
+  })
+}
+
+function getPendenti(metric,criteria,years,callback){
+  var partial = []
+  var title = ""
+  switch(metric) {
+      case 'Average':
+          funct   = ut.getPendentiAvg
+          title   = 'Media'
+          break;
+      case 'Median':
+          funct   = ut.getPendentiMedian
+          title   = 'Mediana'
+          break;
+      case 'Mode':
+          funct   = ut.getPendentiAvg
+          title   = 'Moda'
+          break;
+      default:
+          funct   = ut.getPendentiAvg
+          title   = 'Media'
+  }
+  funct('$'+criteria,years).toArray(function (err, data){
+    if (err) {
+      console.log(err)
+      return
+    }
+    for (index in data){
+      partial.push(data[index])
+    }
+    res = utils.formatTable(partial,"Pendenti Ultra Triennali " + title)
+    callback(res)
+  })
+}
+
+
 function getUTObiettivi(metric,criteria,years,callback){
   var title   = ""
   var partial = []
@@ -657,28 +753,6 @@ function getUTObiettivi(metric,criteria,years,callback){
           funct = ut.getUTObiettiviAvg
           title = "Media"
   }
-
-  // tr.getTribunaleDetail(tribunale).toArray(function(err,data){
-  //   if (err) {
-  //     console.log(err)
-  //     return
-  //   }
-  //   var filter
-  //   for (index in data){
-  //     filter = data[index]
-  //   }
-  //   partial = []
-  //   funct('$tribunale',years,res).toArray(function (err,data){
-  //     if (err){
-  //       console.log(err)
-  //       return
-  //     }
-  //     for (index in data){
-  //       var doc = data[index]
-  //       if (doc['_id'].aggregazione == tribunale){
-  //         partial.push(doc)
-  //       }
-  //     }
       funct('$'+criteria,years,res).toArray(function (err, data){
         if (err) {
           console.log(err)
@@ -700,15 +774,19 @@ function getUTObiettiviByTribunale(metric, tribunale,criteria,years,callback){
   switch(metric) {
       case 'Average':
           funct = ut.getUTObiettiviAvg
+          title = "Media"
           break;
       case 'Median':
           funct = ut.getUTObiettiviMedian
+          title = "Mediana"
           break;
       case 'Mode':
           funct = ut.getUTObiettiviMode
+          title = "Moda"
           break;
       default:
           funct = ut.getUTObiettiviAvg
+          title = "Media"
   }
 
   tr.getTribunaleDetail(tribunale).toArray(function(err,data){
@@ -741,7 +819,7 @@ function getUTObiettiviByTribunale(metric, tribunale,criteria,years,callback){
           if (data[index]['_id'].aggregazione == filter[criteria])
           partial.push(data[index])
         }
-        var res = ut.formatUT(partial," Obiettivi " + metric)
+        var res = ut.formatUT(partial," Obiettivi (%) " + title)
         callback(res)
       })
     })

@@ -1,8 +1,8 @@
 
 var templateTribunali = $('#tribunali-fill').html()
 
-var host = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
-// var host = 'http://localhost:3000/'
+// var host = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
+ var host = 'http://localhost:3000/'
 
 $(function(){
   $.ajax({
@@ -106,7 +106,9 @@ function fetchData(metric,callback){
         //console.log("hola" + JSON.stringify(data))
         //console.log($("#tabular-template").html())
         var template = Handlebars.compile(templateString)
-        $("#table-location"+metric).html(template(data['data']))
+
+        // TODO Continuar aca: como hago para mostrar los numeros reales ademas?
+        $("#table-location"+metric).html(template(data['tabularData']))
         drawChart(data,title,metric,type)
         if (typeof callback === "function") callback(true)
       },
