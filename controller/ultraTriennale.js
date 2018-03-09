@@ -922,6 +922,62 @@ function getPendentiUTMedian(criteria, years, res){
   return result
 }
 
+function getPendentiAvg(criteria, years){
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          rawNumbers:{$push:{'pendenti':'$pendenti'}},
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "pendenti": {
+            "$divide": [
+                { // expression returns total
+                    "$reduce": {
+                        "input": "$rawNumbers",
+                        "initialValue": 0,
+                        "in": { "$add": ["$$value", "$$this.pendenti"] }
+                    }
+                },
+                { // expression returns ratings count
+                    "$cond": [
+                        { "$ne": [ { "$size": "$rawNumbers" }, 0 ] },
+                        { "$size": "$rawNumbers" },
+                        1
+                    ]
+                }
+            ]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        // ultraTriennale:"",
+        rawNumbers:[
+          // {'label':'Pendenti UT','data':round('$pendentiUltraTriennali',0)},
+          {'label':'Pendenti','data':   round('$pendenti',0)},
+        ]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
 function getPendentiMedian(criteria, years, res){
   var result = db.collection("siecic").aggregate([
     {

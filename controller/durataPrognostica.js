@@ -63,10 +63,10 @@ function formatDP(data,title){
           ticks: {
             // the data minimum used for determining the ticks is Math.min(dataMin, suggestedMin)
             //beginAtZero: true,
-            suggestedMin: 180,
+            suggestedMin: 360,
             // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
             // suggestedMax: 1,
-            stepSize: 20,
+            stepSize: 30,
             // fixedStepSize:0.1,
             // min: -0.1
           }
