@@ -376,6 +376,168 @@ router.get("/DomandaGiustiziaMode", (req,res)=>{
 })
 
 
+router.get("/UTDomandaAverage", (req,res)=>{
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years     = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  var partial   = []
+  var partial2  = []
+  var results   = []
+  var result1   = null
+  var result2   = null
+  var result3   = null
+  var result4   = null
+  let requests = years.map((year) => {
+    return new Promise((resolve,reject) => {
+      // console.log(year)
+      getDomandaGiustizia('Average',criteria,year,function(err, result1){
+          if (err){
+            console.log(err)
+            reject(err)
+          }
+
+          // console.log("RESULT FROM getDG " + JSON.stringify(result))
+          partial = partial.concat(result1)
+
+          ut.getUTInterannuale('Average',criteria,year,function(err,result2){
+            if (err){
+              console.log(err)
+              reject(err)
+            }
+            partial2 = partial2.concat(result2)
+            resolve(true)
+          })
+      })
+    })
+  })
+  Promise.all(requests).then(() => {
+    var resultDG  = dg.formatDG(partial,"Variazione Media (%)")
+    var resultUT  = ut.formatUT(partial2," Interannuale Media (%)")
+    results.push(resultDG)
+    results.push(resultUT)
+    ut.getPendentiUT('Average',criteria,years,(result3)=>{
+      results.push(result3)
+      id.getIscritti('Average',criteria,years,(result4)=>{
+        results.push(result4)
+        utils.joinResults(results,function(resultAll){
+          res.json(resultAll)
+        })
+      })
+    })
+  },(error)=>{
+    console.log(error)
+  });
+})
+
+
+router.get("/UTDomandaMedian", (req,res)=>{
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years     = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  var partial   = []
+  var partial2  = []
+  var results   = []
+  var result1   = null
+  var result2   = null
+  var result3   = null
+  var result4   = null
+  var result5   = null
+  let requests = years.map((year) => {
+    return new Promise((resolve,reject) => {
+      // console.log(year)
+      getDomandaGiustizia('Median',criteria,year,function(err, result1){
+          if (err){
+            console.log(err)
+            reject(err)
+          }
+
+          // console.log("RESULT FROM getDG " + JSON.stringify(result))
+          partial = partial.concat(result1)
+
+          ut.getUTInterannuale('Median',criteria,year,function(err,result2){
+            if (err){
+              console.log(err)
+              reject(err)
+            }
+            partial2 = partial2.concat(result2)
+            resolve(true)
+          })
+      })
+    })
+  })
+  Promise.all(requests).then(() => {
+    var resultDG  = dg.formatDG(partial,"Variazione Mediana (%)")
+    var resultUT = ut.formatUT(partial2," Interannuale Mediana (%)")
+    var results = []
+    results.push(resultDG)
+    results.push(resultUT)
+    ut.getPendentiUT('Median',criteria,years,(result3)=>{
+      results.push(result3)
+      ut.getPendenti('Median',criteria,years,(result5)=>{
+        results.push(result5)
+        id.getIscritti('Median',criteria,years,(result4)=>{
+          results.push(result4)
+          utils.joinResults(results,function(resultAll){
+            res.json(resultAll)
+          })
+        })
+      })
+    })
+  },(error)=>{
+    console.log(error)
+  });
+})
+
+router.get("/UTDomandaMode", (req,res)=>{
+  // var tribunale = req.query.tribunale
+  var criteria  = req.query.criteria
+  var years     = req.query.years.map(function(year){
+    return parseInt(year)
+  })
+  partial  = []
+  partial2 = []
+
+  let requests = years.map((year) => {
+    return new Promise((resolve,reject) => {
+      // console.log(year)
+      getDomandaGiustizia('Mode',criteria,year,function(err, result){
+          if (err){
+            console.log(err)
+            reject(err)
+          }
+
+          // console.log("RESULT FROM getDG " + JSON.stringify(result))
+          partial = partial.concat(result)
+
+          ut.getUTInterannuale('Mode',criteria,year,function(err,result2){
+            if (err){
+              console.log(err)
+              reject(err)
+            }
+            partial2 = partial2.concat(result2)
+            resolve(true)
+          })
+      })
+    })
+  })
+  Promise.all(requests).then(() => {
+    var resultDG  = dg.formatDG(partial,"Variazione Moda (%)")
+    var resultUT = ut.formatUT(partial2," Interannuale Moda (%)")
+    var results = []
+    results.push(resultDG)
+    results.push(resultUT)
+    utils.joinResults(results,function(resultAll){
+      res.json(resultAll)
+    })
+  },(error)=>{
+    console.log(error)
+  });
+})
+
 function getDomandaGiustiziaByTribunale(metric,tribunale,criteria,year,callback){
 
   switch(metric) {
@@ -433,152 +595,6 @@ function getDomandaGiustiziaByTribunale(metric,tribunale,criteria,year,callback)
     })
   })
 }
-
-
-router.get("/UTDomandaAverage", (req,res)=>{
-  // var tribunale = req.query.tribunale
-  var criteria  = req.query.criteria
-  var years     = req.query.years.map(function(year){
-    return parseInt(year)
-  })
-  partial  = []
-  partial2 = []
-
-  let requests = years.map((year) => {
-    return new Promise((resolve,reject) => {
-      // console.log(year)
-      getDomandaGiustizia('Average',criteria,year,function(err, result){
-          if (err){
-            console.log(err)
-            reject(err)
-          }
-
-          // console.log("RESULT FROM getDG " + JSON.stringify(result))
-          partial = partial.concat(result)
-
-          ut.getUTInterannuale('Average',criteria,year,function(err,result2){
-            if (err){
-              console.log(err)
-              reject(err)
-            }
-            partial2 = partial2.concat(result2)
-            resolve(true)
-          })
-      })
-    })
-  })
-  Promise.all(requests).then(() => {
-    // console.log('done')
-    // console.log('calling formatUT ' +  JSON.stringify(partial2))
-    // console.log('calling formatDG ' + JSON.stringify(partial))
-    var resultDG  = dg.formatDG(partial,"Variazione Media (%)")
-    var resultUT = ut.formatUT(partial2," Interannuale Media (%)")
-    var results = []
-    results.push(resultDG)
-    results.push(resultUT)
-    utils.joinResults(results,function(resultAll){
-      res.json(resultAll)
-    })
-  },(error)=>{
-    console.log(error)
-  });
-})
-
-
-router.get("/UTDomandaMedian", (req,res)=>{
-  // var tribunale = req.query.tribunale
-  var criteria  = req.query.criteria
-  var years     = req.query.years.map(function(year){
-    return parseInt(year)
-  })
-  partial  = []
-  partial2 = []
-
-  let requests = years.map((year) => {
-    return new Promise((resolve,reject) => {
-      // console.log(year)
-      getDomandaGiustizia('Median',criteria,year,function(err, result){
-          if (err){
-            console.log(err)
-            reject(err)
-          }
-
-          // console.log("RESULT FROM getDG " + JSON.stringify(result))
-          partial = partial.concat(result)
-
-          ut.getUTInterannuale('Median',criteria,year,function(err,result2){
-            if (err){
-              console.log(err)
-              reject(err)
-            }
-            partial2 = partial2.concat(result2)
-            resolve(true)
-          })
-      })
-    })
-  })
-  Promise.all(requests).then(() => {
-    // console.log('done')
-    // console.log('calling formatUT ' +  JSON.stringify(partial2))
-    // console.log('calling formatDG ' + JSON.stringify(partial))
-    var resultDG  = dg.formatDG(partial,"Variazione Mediana (%)")
-    var resultUT = ut.formatUT(partial2," Interannuale Mediana (%)")
-    var results = []
-    results.push(resultDG)
-    results.push(resultUT)
-    utils.joinResults(results,function(resultAll){
-      res.json(resultAll)
-    })
-  },(error)=>{
-    console.log(error)
-  });
-})
-
-router.get("/UTDomandaMode", (req,res)=>{
-  // var tribunale = req.query.tribunale
-  var criteria  = req.query.criteria
-  var years     = req.query.years.map(function(year){
-    return parseInt(year)
-  })
-  partial  = []
-  partial2 = []
-
-  let requests = years.map((year) => {
-    return new Promise((resolve,reject) => {
-      // console.log(year)
-      getDomandaGiustizia('Mode',criteria,year,function(err, result){
-          if (err){
-            console.log(err)
-            reject(err)
-          }
-
-          // console.log("RESULT FROM getDG " + JSON.stringify(result))
-          partial = partial.concat(result)
-
-          ut.getUTInterannuale('Mode',criteria,year,function(err,result2){
-            if (err){
-              console.log(err)
-              reject(err)
-            }
-            partial2 = partial2.concat(result2)
-            resolve(true)
-          })
-      })
-    })
-  })
-  Promise.all(requests).then(() => {
-    var resultDG  = dg.formatDG(partial,"Variazione Moda (%)")
-    var resultUT = ut.formatUT(partial2," Interannuale Moda (%)")
-    var results = []
-    results.push(resultDG)
-    results.push(resultUT)
-    utils.joinResults(results,function(resultAll){
-      res.json(resultAll)
-    })
-  },(error)=>{
-    console.log(error)
-  });
-})
 
 function getDomandaGiustizia(metric,criteria,year,callback){
 
