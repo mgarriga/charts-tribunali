@@ -57,13 +57,12 @@ function formatP(data,title){
         display:true,
         text: 'Produttivita ' + title,
       },
-      //TODO Move scales to formatMetric() to set the options according to the metric
       scales: {
         yAxes: [{
           ticks: {
             // the data minimum used for determining the ticks is Math.min(dataMin, suggestedMin)
             //beginAtZero: true,
-            suggestedMin: 0,
+            suggestedMin: 50,
             // // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
             // suggestedMax: 1,
             stepSize: 10,
@@ -551,8 +550,136 @@ function getProduttivitaControfattualeMode(criteria, years, res){
   // })
   return result
 }
-
-
 module.exports.getProduttivitaControfattualeAvg    = getProduttivitaControfattualeAvg
 module.exports.getProduttivitaControfattualeMedian = getProduttivitaControfattualeMedian
 module.exports.getProduttivitaControfattualeMode   = getProduttivitaControfattualeMode
+
+function getMagistratiPresentiAvg(criteria, years){
+
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          magistrati:{$avg:"$magistrati-presenti"},
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[{'label':'Magistrati Presenti','data':round('$magistrati',0)}]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+function getMagistratiPresentiMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        magistrati:{$push:"$magistrati-presenti"}
+      }
+    },
+    {
+      "$unwind":"$magistrati"
+    },
+    {
+      "$sort":{
+        magistrati:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "magistrati":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "magistrati":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        magistrati:{
+          $push:"$magistrati"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "beginValue":{
+          "$arrayElemAt":["$magistrati","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$magistrati","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        magistrati:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[{'label':'Magistrati Presenti','data':round('$magistrati',0)}]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+module.exports.getMagistratiPresentiAvg     = getMagistratiPresentiAvg
+module.exports.getMagistratiPresentiMedian  = getMagistratiPresentiMedian
