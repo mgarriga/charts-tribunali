@@ -142,13 +142,26 @@ router.get("/ProduttivitaMagistratoAverage", (req,res)=>{
 
   // var tribunale = req.query.tribunale
   var criteria  = req.query.criteria
-
   var years = req.query.years.map(function(year){
     return parseInt(year)
   })
-  getProduttivitaMagistrato('Average',criteria,years,function(result){
-      res.json(result)
+  var results = []
+  var result1 = null
+  var result2 = null
+  var result3 = null
+  getProduttivitaMagistrato('Average',criteria,years,(result1)=>{
+    results.push(result1)
+    id.getDefiniti('Average',criteria,years,(result2)=>{
+      results.push(result2)
+      getMagistratiPresenti('Average',criteria,years,(result3)=>{
+        results.push(result3)
+        utils.joinResults(results,(result)=>{
+          res.json(result)
+        })
+      })
+    })
   })
+
 })
 
 router.get("/ProduttivitaMagistratoMedian", (req,res)=>{
@@ -159,8 +172,21 @@ router.get("/ProduttivitaMagistratoMedian", (req,res)=>{
   var years = req.query.years.map(function(year){
     return parseInt(year)
   })
-  getProduttivitaMagistrato('Median',criteria,years,function(result){
-      res.json(result)
+  var results = []
+  var result1 = null
+  var result2 = null
+  var result3 = null
+  getProduttivitaMagistrato('Median',criteria,years,(result1)=>{
+    results.push(result1)
+    id.getDefiniti('Median',criteria,years,(result2)=>{
+      results.push(result2)
+      getMagistratiPresenti('Median',criteria,years,(result3)=>{
+        results.push(result3)
+        utils.joinResults(results,(result)=>{
+          res.json(result)
+        })
+      })
+    })
   })
 })
 
@@ -461,27 +487,16 @@ function getMagistratiPresenti(metric,criteria,years,callback){
           funct = p.getMagistratiPresentiAvg
           title = 'Media'
   }
-
-  funct('$tribunale',years).toArray(function (err, data){
+  funct('$'+criteria,years).toArray(function (err, data){
     if (err) {
       console.log(err)
       return
     }
     for (index in data){
-      var doc = data[index]
-      partial.push(doc)
+      partial.push(data[index])
     }
-    funct('$'+criteria,years).toArray(function (err, data){
-      if (err) {
-        console.log(err)
-        return
-      }
-      for (index in data){
-        partial.push(data[index])
-      }
-      res = utils.formatTable(partial,"Magistrati Presenti" + metric)
-      callback(res)
-    })
+    res = utils.formatTable(partial,"Magistrati Presenti" + metric)
+    callback(res)
   })
 }
 
