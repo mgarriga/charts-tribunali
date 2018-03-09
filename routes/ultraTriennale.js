@@ -16,7 +16,7 @@ router.get("/UTSuPendentiByTribunaleAverage", (req,res)=>{
   var results = []
   getUTSuPendentiByTribunale('Average', tribunale,criteria,years,function(result1){
     results.push(result1)
-    getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result2){
+    ut.getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result2){
       results.push(result2)
       utils.joinResults(results,function(result){
         // console.log("FINAL")
@@ -38,9 +38,9 @@ router.get("/UTSuPendentiByTribunaleMedian", (req,res)=>{
   var results = []
   getUTSuPendentiByTribunale('Median', tribunale,criteria,years,function(result1){
     results.push(result1)
-    getPendentiUTByTribunale('Median',tribunale,criteria,years,function(result2){
+    ut.getPendentiUTByTribunale('Median',tribunale,criteria,years,function(result2){
       results.push(result2)
-      getPendentiByTribunale('Median',tribunale,criteria,years,function(result3){
+      ut.getPendentiByTribunale('Median',tribunale,criteria,years,function(result3){
         results.push(result3)
         utils.joinResults(results,function(result){
           res.json(result)
@@ -79,9 +79,9 @@ router.get("/UTObiettiviByTribunaleAverage", (req,res)=>{
 
   getUTSuPendentiByTribunale('Average', tribunale,criteria,years,function(result1){
       results.push(result1)
-    getUTObiettiviByTribunale('Average',tribunale, criteria,years,function(result2){
+      getUTObiettiviByTribunale('Average',tribunale, criteria,years,function(result2){
       results.push(result2)
-      getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result3){
+      ut.getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result3){
         results.push(result3)
         utils.joinResults(results,function(result){
           res.json(result)
@@ -105,9 +105,9 @@ router.get("/UTObiettiviByTribunaleMedian", (req,res)=>{
       results.push(result1)
     getUTObiettiviByTribunale('Median',tribunale, criteria,years,function(result2){
       results.push(result2)
-      getPendentiUTByTribunale('Median',tribunale,criteria,years,function(result3){
+      ut.getPendentiUTByTribunale('Median',tribunale,criteria,years,function(result3){
         results.push(result3)
-        getPendentiByTribunale('Median',tribunale,criteria,years,function(result4){
+        ut.getPendentiByTribunale('Median',tribunale,criteria,years,function(result4){
           results.push(result4)
           utils.joinResults(results, function(result){
             res.json(result)
@@ -128,7 +128,7 @@ router.get("/UTObiettiviByTribunaleMode", (req,res)=>{
   })
   results = []
   getUTSuPendentiByTribunale('Mode', tribunale,criteria,years,function(result1){
-      results.push(result1)
+    results.push(result1)
     getUTObiettiviByTribunale('Mode',tribunale, criteria,years,function(result2){
       results.push(result2)
       utils.joinResults(results, function(result){
@@ -164,7 +164,7 @@ router.get("/UTInterannualeByTribunaleAverage", (req,res)=>{
   })
   Promise.all(requests).then(() => {
       // console.log("PARTIAL: "+ JSON.stringify(partial))
-      getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result2){
+      ut.getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result2){
         results.push(result2)
         var formatRes = ut.formatUT(partial, "Interannuale Media (%)")
         results.splice(0,0,formatRes)
@@ -205,9 +205,9 @@ router.get("/UTInterannualeByTribunaleMedian", (req,res)=>{
   })
   Promise.all(requests).then(() => {
     // console.log('done')
-    getPendentiUTByTribunale('Median', tribunale,criteria,years,function(result2){
+    ut.getPendentiUTByTribunale('Median', tribunale,criteria,years,function(result2){
       results.push(result2)
-      getPendentiByTribunale('Median',tribunale,criteria,years,function(result3){
+      ut.getPendentiByTribunale('Median',tribunale,criteria,years,function(result3){
         results.push(result3)
         var formatRes = ut.formatUT(partial, "Interannuale Mediana (%)")
         results.splice(0,0,formatRes)
@@ -262,7 +262,7 @@ router.get("/UTSuPendentiAverage", (req,res)=>{
   var results          = []
   getUTSuPendenti('Average',criteria,years,function(result1){
     results.push(result1)
-    getPendentiUT('Average',criteria,years,function(result2){
+    ut.getPendentiUT('Average',criteria,years,function(result2){
       results.push(result2)
       utils.joinResults(results,function(result){
         res.json(result)
@@ -281,9 +281,9 @@ router.get("/UTSuPendentiMedian", (req,res)=>{
   var result1, result2, result3 = null
   getUTSuPendenti('Median',criteria,years,function(result1){
     results.push(result1)
-    getPendentiUT('Median',criteria,years,function(result2){
+    ut.getPendentiUT('Median',criteria,years,function(result2){
       results.push(result2)
-      getPendenti('Median',criteria,years,function(result3){
+      ut.getPendenti('Median',criteria,years,function(result3){
         results.push(result3)
         utils.joinResults(results,function(result){
           res.json(result)
@@ -316,10 +316,10 @@ router.get("/UTObiettiviAverage", (req,res)=>{
   var results = []
   var result1, result2, result3 = null
   getUTSuPendenti('Average',criteria,years,function(result1){
-      results.push(result1)
+    results.push(result1)
     getUTObiettivi('Average',criteria,years,function(result2){
       results.push(result2)
-      getPendentiUT('Average',criteria,years,function(result3){
+      ut.getPendentiUT('Average',criteria,years,function(result3){
         results.push(result3)
         utils.joinResults(results,function(result){
           res.json(result)
@@ -343,9 +343,9 @@ router.get("/UTObiettiviMedian", (req,res)=>{
       results.push(result1)
     getUTObiettivi('Median',criteria,years,function(result2){
       results.push(result2)
-      getPendentiUT('Median',criteria,years,function(result3){
+      ut.getPendentiUT('Median',criteria,years,function(result3){
         results.push(result3)
-        getPendenti('Median',criteria,years,function(result4){
+        ut.getPendenti('Median',criteria,years,function(result4){
           results.push(result4)
           utils.joinResults(results,function(result){
             res.json(result)
@@ -401,7 +401,7 @@ router.get("/UTInterannualeAverage", (req,res)=>{
   })
   Promise.all(requests).then(() => {
 
-    getPendentiUT('Average',criteria,years,function(result2){
+    ut.getPendentiUT('Average',criteria,years,function(result2){
       results.push(result2)
       var formatRes = ut.formatUT(partial,"Interannuale Media (%)")
       results.splice(0,0,formatRes)
@@ -440,9 +440,9 @@ router.get("/UTInterannualeMedian", (req,res)=>{
   })
   Promise.all(requests).then(() => {
 
-    getPendentiUT('Median',criteria,years,function(result2){
+    ut.getPendentiUT('Median',criteria,years,function(result2){
       results.push(result2)
-      getPendenti('Median',criteria,years,function(result3){
+      ut.getPendenti('Median',criteria,years,function(result3){
         results.push(result3)
         var formatRes = ut.formatUT(partial,'Interannuale Mediana (%)')
         results.splice(0,0,formatRes)
@@ -580,192 +580,6 @@ function getUTSuPendentiByTribunale(metric,tribunale,criteria,years,callback){
   })
 }
 
-function getPendentiUTByTribunale(metric,tribunale,criteria,years,callback){
-  var partial = []
-  var title = ""
-  switch(metric) {
-      case 'Average':
-          funct     = ut.getPendentiUTAvg
-          title     = 'Media'
-          break;
-      case 'Median':
-          funct     = ut.getPendentiUTMedian
-          title     = 'Mediana'
-          break;
-      case 'Mode':
-          funct     = ut.getPendentiUTAvg
-          title = 'Moda'
-          break;
-      default:
-          funct     = ut.getPendentiUTAvg
-          title     = 'Media'
-  }
-  // funct('$'+criteria,years).toArray(function (err, data){
-  funct('$tribunale',years).toArray(function (err, data){
-    if (err) {
-      console.log(err)
-      return
-    }
-    for (index in data){
-      var doc = data[index]
-      if (doc['_id'].aggregazione == tribunale){
-        partial.push(doc)
-      }
-    }
-  //    var result = cr.formatClearance(data,"Average")
-    var filter
-    tr.getTribunaleDetail(tribunale).toArray(function(err,data){
-      if (err) {
-        console.log(err)
-        return
-      }
-      for (index in data){
-        filter = data[index]
-      }
-      funct('$'+criteria,years).toArray(function (err, data){
-        if (err) {
-          console.log(err)
-          return
-        }
-        for (index in data){
-          if (data[index]['_id'].aggregazione == filter[criteria]) partial.push(data[index])
-        }
-        // console.log(JSON.stringify(partial))
-        // TODO Continuar Acá: cómo mostrar la data de RawResults en la tabla?
-        res = utils.formatTable(partial,"Pendenti Ultra Triennali " + title)
-        callback(res)
-      })
-      //getClearanceRates(res)
-    })
-  })
-}
-
-function getPendentiByTribunale(metric,tribunale,criteria,years,callback){
-  partial = []
-  title = ""
-  switch(metric) {
-      case 'Average':
-          funct     = ut.getPendentiAvg
-          title     = 'Media'
-          break;
-      case 'Median':
-          funct     = ut.getPendentiMedian
-          title     = 'Mediana'
-          break;
-      case 'Mode':
-          funct     = ut.getPendentiAvg
-          title = 'Moda'
-          break;
-      default:
-          funct     = ut.getPendentiAvg
-          title     = 'Media'
-  }
-  // funct('$'+criteria,years).toArray(function (err, data){
-  funct('$tribunale',years).toArray(function (err, data){
-    if (err) {
-      console.log(err)
-      return
-    }
-    for (index in data){
-      var doc = data[index]
-      if (doc['_id'].aggregazione == tribunale){
-        partial.push(doc)
-      }
-    }
-  //    var result = cr.formatClearance(data,"Average")
-    var filter
-    tr.getTribunaleDetail(tribunale).toArray(function(err,data){
-      if (err) {
-        console.log(err)
-        return
-      }
-      for (index in data){
-        filter = data[index]
-      }
-      funct('$'+criteria,years).toArray(function (err, data){
-        if (err) {
-          console.log(err)
-          return
-        }
-        for (index in data){
-          if (data[index]['_id'].aggregazione == filter[criteria]) partial.push(data[index])
-        }
-        // console.log(JSON.stringify(partial))
-        // TODO Continuar Acá: cómo mostrar la data de RawResults en la tabla?
-        res = utils.formatTable(partial,"PENDENTI " + title)
-        callback(res)
-      })
-      //getClearanceRates(res)
-    })
-  })
-}
-
-function getPendentiUT(metric,criteria,years,callback){
-  var partial = []
-  var title = ""
-  switch(metric) {
-      case 'Average':
-          funct   = ut.getPendentiUTAvg
-          title   = 'Media'
-          break;
-      case 'Median':
-          funct   = ut.getPendentiUTMedian
-          title   = 'Mediana'
-          break;
-      case 'Mode':
-          funct   = ut.getPendentiUTAvg
-          title   = 'Moda'
-          break;
-      default:
-          funct   = ut.getPendentiUTAvg
-          title   = 'Media'
-  }
-  funct('$'+criteria,years).toArray(function (err, data){
-    if (err) {
-      console.log(err)
-      return
-    }
-    for (index in data){
-      partial.push(data[index])
-    }
-    res = utils.formatTable(partial,"Pendenti Ultra Triennali " + title)
-    callback(res)
-  })
-}
-
-function getPendenti(metric,criteria,years,callback){
-  var partial = []
-  var title = ""
-  switch(metric) {
-      case 'Average':
-          funct   = ut.getPendentiAvg
-          title   = 'Media'
-          break;
-      case 'Median':
-          funct   = ut.getPendentiMedian
-          title   = 'Mediana'
-          break;
-      case 'Mode':
-          funct   = ut.getPendentiAvg
-          title   = 'Moda'
-          break;
-      default:
-          funct   = ut.getPendentiAvg
-          title   = 'Media'
-  }
-  funct('$'+criteria,years).toArray(function (err, data){
-    if (err) {
-      console.log(err)
-      return
-    }
-    for (index in data){
-      partial.push(data[index])
-    }
-    res = utils.formatTable(partial,"Pendenti Ultra Triennali " + title)
-    callback(res)
-  })
-}
-
 
 function getUTObiettivi(metric,criteria,years,callback){
   var title   = ""
@@ -860,68 +674,4 @@ function getUTObiettiviByTribunale(metric, tribunale,criteria,years,callback){
   })
 }
 
-
 module.exports = router
-
-// router.get("/UTInterannualeByTribunaleAverage", (req,res)=>{
-//
-//   var tribunale = req.query.tribunale
-//   var criteria  = req.query.criteria
-//   var years = req.query.years.map(function(year){
-//     return parseInt(year)
-//   })
-//   partial = []
-//
-//   let requests = years.map((year) => {
-//     return new Promise((resolve,reject) => {
-// //        asyncFunction(year, resolve);
-//       // console.log(year)
-//       ut.getUTInterannualeAvg('$tribunale',year).toArray(function (err, data){
-//         if (err) {
-//           console.log(err)
-//           reject(err)
-//         }
-//         for (index in data){
-//           var doc = data[index]
-//           if (doc['_id'].aggregazione == tribunale){
-//             doc['_id'].anno = year
-//             partial.push(doc)
-//           }
-//         }
-//         //    var result = cr.formatClearance(data,"Average")
-//
-//         var filter
-//         tr.getTribunaleDetail(tribunale).toArray(function(err,data){
-//           if (err) {
-//             console.log(err)
-//             reject(err)
-//           }
-//           for (index in data){
-//             filter = data[index]
-//           }
-//           ut.getUTInterannualeAvg('$'+criteria,year)
-//           .toArray(function (err, data){
-//             if (err) {
-//               console.log(err)
-//               reject(err)
-//             }
-//             for (index in data){
-//               if (data[index]['_id'].aggregazione == filter[criteria]){
-//                 data[index]['_id'].anno = year
-//                 partial.push(data[index])
-//               }
-//             }
-//             resolve(true)
-//           })
-//         })
-//       })
-//     })
-//   })
-//   Promise.all(requests).then(() => {
-//     // console.log('done')
-//     var result = ut.formatUT(partial,"Interannuale Avg")
-//     res.json(result)
-//   },(error)=>{
-//     console.log(error)
-//   });
-// })

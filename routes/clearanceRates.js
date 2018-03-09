@@ -4,6 +4,7 @@ var router = express.Router();
 
 var cr = require('../controller/clearanceRates')
 var tr = require('../controller/tribunali')
+var id = require('../controller/iscrittiDefiniti')
 var utils = require('../utils/utils')
 
 router.get("/clearanceRateAverage", (req,res)=>{
@@ -24,9 +25,9 @@ router.get("/clearanceRateAverage", (req,res)=>{
       }
       var result1 = cr.formatClearance(data,"Simple Media")
       results.push(result1)
-      getDefiniti('Average',criteria,years,(result2)=>{
+      id.getDefiniti('Average',criteria,years,(result2)=>{
         results.push(result2)
-        getIscritti('Average',criteria,years,(result3)=>{
+        id.getIscritti('Average',criteria,years,(result3)=>{
           results.push(result3)
           utils.joinResults(results,(result)=>{
             res.json(result)
@@ -52,9 +53,9 @@ router.get("/clearanceRateMedian", (req,res)=>{
     }
     var result1 = cr.formatClearance(data,"Simple Mediana")
     results.push(result1)
-    getDefiniti('Median',criteria,years,(result2)=>{
+    id.getDefiniti('Median',criteria,years,(result2)=>{
       results.push(result2)
-      getIscritti('Median',criteria,years,(result3)=>{
+      id.getIscritti('Median',criteria,years,(result3)=>{
         results.push(result3)
         utils.joinResults(results,(result)=>{
           res.json(result)
@@ -108,9 +109,9 @@ router.get("/clearanceRateFullAverage", (req,res)=>{
   })
 
   Promise.all(requests).then(() => {
-    getDefiniti('Average',criteria,years,(result2)=>{
+    id.getDefiniti('Average',criteria,years,(result2)=>{
       results.push(result2)
-      getIscritti('Average',criteria,years,(result3)=>{
+      id.getIscritti('Average',criteria,years,(result3)=>{
         results.push(result3)
         var formatRes = cr.formatClearance(partial,"Rate Full Media")
         results.splice(0,0,formatRes)
@@ -149,9 +150,9 @@ router.get("/clearanceRateFullMedian", (req,res)=>{
   })
 
   Promise.all(requests).then(() => {
-    getDefiniti('Median',criteria,years,(result2)=>{
+    id.getDefiniti('Median',criteria,years,(result2)=>{
       results.push(result2)
-      getIscritti('Median',criteria,years,(result3)=>{
+      id.getIscritti('Median',criteria,years,(result3)=>{
         results.push(result3)
         var formatRes = cr.formatClearance(partial,"Rate Full Mediana")
         results.splice(0,0,formatRes)
@@ -212,9 +213,9 @@ router.get("/clearanceRateByTribunaleAverage", (req,res)=>{
   var result3 = null
   getClearanceByTribunale('Average',tribunale,criteria,years,(result1)=>{
     results.push(result1)
-    getDefinitiByTribunale('Average',tribunale,criteria,years,(result2)=>{
+    id.getDefinitiByTribunale('Average',tribunale,criteria,years,(result2)=>{
       results.push(result2)
-      getIscrittiByTribunale('Average',tribunale,criteria,years,(result3)=>{
+      id.getIscrittiByTribunale('Average',tribunale,criteria,years,(result3)=>{
         results.push(result3)
         utils.joinResults(results,(result)=>{
           res.json(result)
@@ -237,9 +238,9 @@ router.get("/clearanceRateByTribunaleMedian", (req,res)=>{
   var result3 = null
   getClearanceByTribunale('Median',tribunale,criteria,years,(result1)=>{
     results.push(result1)
-    getDefinitiByTribunale('Median',tribunale,criteria,years,(result2)=>{
+    id.getDefinitiByTribunale('Median',tribunale,criteria,years,(result2)=>{
       results.push(result2)
-      getIscrittiByTribunale('Median',tribunale,criteria,years,(result3)=>{
+      id.getIscrittiByTribunale('Median',tribunale,criteria,years,(result3)=>{
         results.push(result3)
         utils.joinResults(results,(result)=>{
           res.json(result)
@@ -289,9 +290,9 @@ router.get("/clearanceRateFullByTribunaleAverage", (req,res)=>{
   })
   Promise.all(requests).then(() => {
     // console.log('done')
-    getDefinitiByTribunale('Average',tribunale,criteria,years,(result2)=>{
+    id.getDefinitiByTribunale('Average',tribunale,criteria,years,(result2)=>{
       results.push(result2)
-      getIscrittiByTribunale('Average',tribunale,criteria,years,(result3)=>{
+      id.getIscrittiByTribunale('Average',tribunale,criteria,years,(result3)=>{
         results.push(result3)
         var formatRes = cr.formatClearance(partial,"Rate Full Media")
         results.splice(0,0,formatRes)
@@ -331,9 +332,9 @@ router.get("/clearanceRateFullByTribunaleMedian", (req,res)=>{
       })
   })
   Promise.all(requests).then(() => {
-    getDefinitiByTribunale('Median',tribunale,criteria,years,(result2)=>{
+    id.getDefinitiByTribunale('Median',tribunale,criteria,years,(result2)=>{
       results.push(result2)
-      getIscrittiByTribunale('Median',tribunale,criteria,years,(result3)=>{
+      id.getIscrittiByTribunale('Median',tribunale,criteria,years,(result3)=>{
         results.push(result3)
         var formatRes = cr.formatClearance(partial,"Rate Full Mediana")
         results.splice(0,0,formatRes)
@@ -375,9 +376,9 @@ router.get("/clearanceRateFullByTribunaleMode", (req,res)=>{
       })
   })
   Promise.all(requests).then(() => {
-    getDefinitiByTribunale('Average',tribunale,criteria,years,(result2)=>{
+    id.getDefinitiByTribunale('Average',tribunale,criteria,years,(result2)=>{
       results.push(result2)
-      getIscrittiByTribunale('Average',tribunale,criteria,years,(result3)=>{
+      id.getIscrittiByTribunale('Average',tribunale,criteria,years,(result3)=>{
         results.push(result3)
         var formatRes = cr.formatClearance(partial,"Rate Full Moda")
         results.splice(0,0,formatRes)
@@ -528,179 +529,5 @@ function getClearanceByTribunale(metric,tribunale,criteria,years,callback){
   })
 }
 
-function getDefinitiByTribunale(metric,tribunale,criteria,years,callback){
-  switch(metric) {
-      case 'Average':
-          funct = cr.getDefinitiAvg
-          title = "Media"
-          break;
-      case 'Median':
-          funct = cr.getDefinitiMedian
-          title = "Mediana"
-          break;
-      case 'Mode':
-          funct = cr.getDefinitiMode
-          title = "Moda"
-          break;
-      default:
-          funct = cr.getDefinitiAvg
-          title = "Media"
-  }
-  tr.getTribunaleDetail(tribunale).toArray((err,data)=>{
-    if (err) {
-      console.log(err)
-      return
-    }
-    var filter
-    for (index in data){
-      filter = data[index]
-    }
-    var partial = []
-    funct('$tribunale',years).toArray((err, data)=>{
-      if (err) {
-        console.log(err)
-        return
-      }
-      for (index in data){
-        var doc = data[index]
-        if (doc['_id'].aggregazione == tribunale){
-          partial.push(doc)
-        }
-      }
-      funct('$'+criteria,years).toArray((err, data) => {
-        if (err) {
-          console.log(err)
-          return
-        }
-        for (index in data){
-          if (data[index]['_id'].aggregazione == filter[criteria])
-            partial.push(data[index])
-        }
-        var result = utils.formatTable(partial,"Definiti " + title)
-        callback(result)
-      })
-    })
-  })
-}
-
-function getIscrittiByTribunale(metric,tribunale,criteria,years,callback){
-  var partial = []
-  var title   = ""
-  switch(metric) {
-      case 'Average':
-          funct = cr.getIscrittiAvg
-          title = "Media"
-          break;
-      case 'Median':
-          funct = cr.getIscrittiMedian
-          title = "Mediana"
-          break;
-      case 'Mode':
-          funct = cr.getIscrittiMode
-          title = "Moda"
-          break;
-      default:
-          funct = cr.getIscrittiAvg
-          title = "Media"
-  }
-  tr.getTribunaleDetail(tribunale).toArray((err,data)=>{
-    if (err) {
-      console.log(err)
-      return
-    }
-    var filter
-    for (index in data){
-      filter = data[index]
-    }
-    funct('$tribunale',years).toArray((err, data)=>{
-      if (err) {
-        console.log(err)
-        return
-      }
-      for (index in data){
-        var doc = data[index]
-        if (doc['_id'].aggregazione == tribunale){
-          partial.push(doc)
-        }
-      }
-      funct('$'+criteria,years).toArray((err, data) => {
-        if (err) {
-          console.log(err)
-          return
-        }
-        for (index in data){
-          if (data[index]['_id'].aggregazione == filter[criteria])
-            partial.push(data[index])
-        }
-        var result = utils.formatTable(partial,"Iscritti " + title)
-        callback(result)
-      })
-    })
-  })
-}
-
-function getDefiniti(metric,criteria,years,callback){
-  switch(metric) {
-      case 'Average':
-          funct = cr.getDefinitiAvg
-          title = "Media"
-          break;
-      case 'Median':
-          funct = cr.getDefinitiMedian
-          title = "Mediana"
-          break;
-      case 'Mode':
-          funct = cr.getDefinitiMode
-          title = "Moda"
-          break;
-      default:
-          funct = cr.getDefinitiAvg
-          title = "Media"
-  }
-  var partial = []
-  funct('$'+criteria,years).toArray((err, data) => {
-    if (err) {
-      console.log(err)
-      return
-    }
-    for (index in data){
-        partial.push(data[index])
-    }
-    var result = utils.formatTable(partial,"Definiti " + title)
-    callback(result)
-  })
-}
-
-function getIscritti(metric,criteria,years,callback){
-  switch(metric) {
-      case 'Average':
-          funct = cr.getIscrittiAvg
-          title = "Media"
-          break;
-      case 'Median':
-          funct = cr.getIscrittiMedian
-          title = "Mediana"
-          break;
-      case 'Mode':
-          funct = cr.getIscrittiMode
-          title = "Moda"
-          break;
-      default:
-          funct = cr.getIscrittiAvg
-          title = "Media"
-  }
-  var partial = []
-  funct('$'+criteria,years).toArray((err, data) => {
-    if (err) {
-      console.log(err)
-      return
-    }
-    for (index in data){
-        partial.push(data[index])
-    }
-    var result = utils.formatTable(partial,"Iscritti " + title)
-    callback(result)
-  })
-}
 
 module.exports = router;

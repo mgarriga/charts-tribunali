@@ -4,6 +4,7 @@ function joinResults(resultArray, callback){
   tabDatasets = []
 
   for  (index in resultArray){
+      // console.log(resultArray[index])
       datasets = datasets.concat(resultArray[index]['data']['datasets'])
       labels   = resultArray[0]['data']['labels']
       options  = resultArray[0]['options']
@@ -43,9 +44,20 @@ function formatTable(data,title){
   //   var b = Math.floor(Math.random() * 255);
   //   return "rgb(" + r + "," + g + "," + b + ")";
   // };
+  data.sort((a,b)=>{
+    if (a['_id']['anno'] == b['_id']['anno']){
+      if (a['_id']['aggregazione'] != null){
+        return (a['_id']['aggregazione']>b['_id']['aggregazione']?1:-1);
+      }
+      else return a['_id']['anno'] - b['_id']['anno']
+    }
+    else return a['_id']['anno'] - b['_id']['anno']
+  })
+  // data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
 
-  data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
   for (index in data){
+
+      // console.log(data[index]['_id'])
        var doc = data[index]
        var category = doc['_id'].aggregazione
        if (doc['_id'].aggregazione == null) category = 'Totale'

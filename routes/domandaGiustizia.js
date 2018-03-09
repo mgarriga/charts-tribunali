@@ -5,6 +5,7 @@ var ut    = require('../controller/ultraTriennale')
 var tr    = require('../controller/tribunali')
 var utils = require('../utils/utils.js')
 var dg    = require('../controller/domandaGiustizia')
+var id    = require('../controller/iscrittiDefiniti')
 
 router.get("/DomandaGiustiziaByTribunaleAverage", (req,res)=>{
   var tribunale = req.query.tribunale
@@ -12,24 +13,33 @@ router.get("/DomandaGiustiziaByTribunaleAverage", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial = []
+  var partial = []
+  var results = []
+  var result1 = null
+  var result2 = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      getDomandaGiustiziaByTribunale('Average',tribunale,criteria,year,function(err, result){
+      getDomandaGiustiziaByTribunale('Average',tribunale,criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-          partial = partial.concat(result)
+          partial = partial.concat(result1)
           // console.log(JSON.stringify(partial))
           resolve(true)
       })
     })
   })
   Promise.all(requests).then(() => {
-    var result = dg.formatDG(partial,"Variazione (%) Media")
-    res.json(result)
+    id.getIscrittiByTribunale('Average',tribunale,criteria,years,(result2)=>{
+      results.push(result2)
+      var formatRes = dg.formatDG(partial,"Variazione (%) Media")
+      results.splice(0,0,formatRes)
+      utils.joinResults(results,(result)=>{
+        res.json(result)
+      })
+    })
   },(error)=>{
     console.log(error)
   });
@@ -42,25 +52,33 @@ router.get("/DomandaGiustiziaByTribunaleMedian", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial = []
+  var partial = []
+  var results = []
+  var result1 = null
+  var result2 = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      getDomandaGiustiziaByTribunale('Median',tribunale,criteria,year,function(err, result){
+      getDomandaGiustiziaByTribunale('Median',tribunale,criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-          partial = partial.concat(result)
+          partial = partial.concat(result1)
           // console.log(JSON.stringify(partial))
           resolve(true)
       })
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
-    var result = dg.formatDG(partial,"Variazione (%) Mediana")
-    res.json(result)
+    id.getIscrittiByTribunale('Median',tribunale,criteria,years,(result2)=>{
+      results.push(result2)
+      var formatRes = dg.formatDG(partial,"Variazione (%) Mediana")
+      results.splice(0,0,formatRes)
+      utils.joinResults(results,(result)=>{
+        res.json(result)
+      })
+    })
   },(error)=>{
     console.log(error)
   });
@@ -102,21 +120,22 @@ router.get("/UTDomandaByTribunaleAverage", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial  = []
-  partial2 = []
-
+  var results   = []
+  var partial   = []
+  var partial2  = []
+  var result    = null
+  var result1   = null
+  var result2   = null
+  var result3   = null
+  var result4   = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
-      // console.log(year)
-      getDomandaGiustiziaByTribunale('Average',tribunale,criteria,year,function(err, result){
+      getDomandaGiustiziaByTribunale('Average',tribunale,criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-
-          // console.log("RESULT FROM getDG " + JSON.stringify(result))
-          partial = partial.concat(result)
-
+          partial = partial.concat(result1)
           ut.getUTInterannualeByTribunale('Average',tribunale,criteria,year,function(err,result2){
             if (err){
               console.log(err)
@@ -129,16 +148,18 @@ router.get("/UTDomandaByTribunaleAverage", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
-    // console.log('calling formatUT ' +  JSON.stringify(partial2))
-    // console.log('calling formatDG ' + JSON.stringify(partial))
     var resultDG  = dg.formatDG(partial,"Variazione Media (%)")
-    var resultUT = ut.formatUT(partial2," Interannuale Media (%)")
-    var results = []
+    var resultUT  = ut.formatUT(partial2," Interannuale Media (%)")
     results.push(resultDG)
     results.push(resultUT)
-    utils.joinResults(results,function(resultAll){
-      res.json(resultAll)
+    ut.getPendentiUTByTribunale('Average',tribunale,criteria,years,(result3)=>{
+      results.push(result3)
+      id.getIscrittiByTribunale('Average',tribunale,criteria,years,(result4)=>{
+        results.push(result4)
+        utils.joinResults(results,function(resultAll){
+          res.json(resultAll)
+        })
+      })
     })
   },(error)=>{
     console.log(error)
@@ -151,21 +172,24 @@ router.get("/UTDomandaByTribunaleMedian", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial  = []
-  partial2 = []
+  var results   = []
+  var partial   = []
+  var partial2  = []
+  var result    = null
+  var result1   = null
+  var result2   = null
+  var result3   = null
+  var result4   = null
+  var result5   = null
 
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
-      // console.log(year)
-      getDomandaGiustiziaByTribunale('Median',tribunale,criteria,year,function(err, result){
+      getDomandaGiustiziaByTribunale('Median',tribunale,criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-
-          // console.log("RESULT FROM getDG " + JSON.stringify(result))
-          partial = partial.concat(result)
-
+          partial = partial.concat(result1)
           ut.getUTInterannualeByTribunale('Median',tribunale,criteria,year,function(err,result2){
             if (err){
               console.log(err)
@@ -178,17 +202,21 @@ router.get("/UTDomandaByTribunaleMedian", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
-    // console.log('calling formatUT ' +  JSON.stringify(partial2))
-
-    // console.log('calling formatDG ' + JSON.stringify(partial))
     var resultDG  = dg.formatDG(partial,"Variazione Mediana (%)")
     var resultUT = ut.formatUT(partial2," Interannuale Mediana (%)")
-    var results = []
     results.push(resultDG)
     results.push(resultUT)
-    utils.joinResults(results,function(resultAll){
-      res.json(resultAll)
+    ut.getPendentiUTByTribunale('Median',tribunale,criteria,years,(result3)=>{
+      results.push(result3)
+      ut.getPendentiByTribunale('Median',tribunale,criteria,years,(result4)=>{
+        results.push(result4)
+        id.getIscrittiByTribunale('Median',tribunale,criteria,years,(result5)=>{
+          results.push(result5)
+          utils.joinResults(results,function(resultAll){
+            res.json(resultAll)
+          })
+        })
+      })
     })
   },(error)=>{
     console.log(error)
@@ -229,10 +257,6 @@ router.get("/UTDomandaByTribunaleMode", (req,res)=>{
     })
   })
   Promise.all(requests).then(() => {
-    // console.log('done')
-    // console.log('calling formatUT ' +  JSON.stringify(partial2))
-
-    // console.log('calling formatDG ' + JSON.stringify(partial))
     var resultDG  = dg.formatDG(partial,"Variazione Moda (%)")
     var resultUT = ut.formatUT(partial2," Interannuale Moda (%)")
     var results = []
@@ -252,24 +276,34 @@ router.get("/DomandaGiustiziaAverage", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial = []
+  var partial = []
+  var results = []
+  var result1 = null
+  var result2 = null
+
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      getDomandaGiustizia('Average',criteria,year,function(err, result){
+      getDomandaGiustizia('Average',criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-          partial = partial.concat(result)
+          partial = partial.concat(result1)
           // console.log(JSON.stringify(partial))
           resolve(true)
       })
     })
   })
   Promise.all(requests).then(() => {
-    var result = dg.formatDG(partial,"Variazione (%) Media")
-    res.json(result)
+    var formatRes = dg.formatDG(partial,"Variazione (%) Media")
+    results.push(formatRes)
+    id.getIscritti('Average',criteria,years,(result2)=>{
+      results.push(result2)
+      utils.joinResults(results,(result)=>{
+        res.json(result)
+      })
+    })
   },(error)=>{
     console.log(error)
   });
@@ -281,24 +315,32 @@ router.get("/DomandaGiustiziaMedian", (req,res)=>{
   var years     = req.query.years.map(function(year){
     return parseInt(year)
   })
-  partial = []
+  var partial = []
+  var results = []
+  var result1 = null
+  var result2 = null
   let requests = years.map((year) => {
     return new Promise((resolve,reject) => {
       // console.log(year)
-      getDomandaGiustizia('Median',criteria,year,function(err, result){
+      getDomandaGiustizia('Median',criteria,year,function(err, result1){
           if (err){
             console.log(err)
             reject(err)
           }
-          partial = partial.concat(result)
-          // console.log(JSON.stringify(partial))
+          partial = partial.concat(result1)
           resolve(true)
       })
     })
   })
   Promise.all(requests).then(() => {
-    var result = dg.formatDG(partial,"Variazione (%) Mediana")
-    res.json(result)
+    var formatRes = dg.formatDG(partial,"Variazione (%) Mediana")
+    results.push(formatRes)
+    id.getIscritti('Median',criteria,years,(result2)=>{
+      results.push(result2)
+      utils.joinResults(results,(result)=>{
+        res.json(result)
+      })
+    })
   },(error)=>{
     console.log(error)
   });
