@@ -1,6 +1,15 @@
 var round =  require('mongo-round')
 
-
+function hashCode(str){
+    var hash = 0;
+    if (str.length == 0) return hash;
+    for (i = 0; i < str.length; i++) {
+        char = str.charCodeAt(i);
+        hash = ((hash<<5)-hash)+char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
 //TODO formatClearance debería estar en la vista, no en el controller
 function formatClearance(data,title){
   //category or "labels" array
@@ -8,15 +17,48 @@ function formatClearance(data,title){
 
   // values array
   var clearanceArray = []
-  var rawNums =
+  // var rawNums =
   // //TODO se ve bastaaante feo el randomcolor
-  // var color = [];
-  // var dynamicColors = function() {
-  //   var r = Math.floor(Math.random() * 255);
-  //   var g = Math.floor(Math.random() * 255);
-  //   var b = Math.floor(Math.random() * 255);
-  //   return "rgb(" + r + "," + g + "," + b + ")";
-  // };
+  var color = []
+  var dynamicColors = function(num) {
+    // var colors = [
+    //   "(114, 147, 203)",
+    //   "(225, 151, 76)",
+    //   "(132, 186, 91)",
+    //   "(211, 94, 96)",
+    //   "(128, 133, 133)",
+    //   "(144, 103, 167)",
+    //   "(171, 104, 87)",
+    //   "(204, 194, 16)",
+    //   "(230, 25, 75)",
+    //   "(60, 180, 75)",
+    //   "(255, 225, 25)",
+    //   "(0, 130, 200)",
+    //   "(245, 130, 48)",
+    //   "(145, 30, 180)",
+    //   "(210, 245, 60)",
+    //   "(250, 190, 190)",
+    //   "(0, 128, 128)",
+    //   "(230, 190, 255)",
+    //   "(170, 110, 40)",
+    //   "(255, 250, 200)",
+    //   "(170, 255, 195)",
+    //   "(128, 128, 0)",
+    //   "(255, 215, 180)",
+    //   "(0, 0, 128)",
+    //   "(128, 128, 128)"
+    // ]
+    //
+    // var index = num % 23
+    // return "rgb"+colors[index]
+
+
+    var r = Math.abs(num) % 255;
+    var g = Math.abs(num) % 254;
+    var b = Math.abs(num) % 253;
+    // console.log("r: " + r + " g: " + g + " b: " + b)
+    return "rgb(" + r + "," + g + "," + b + ")";
+  };
   data.sort((a,b)=>{
     if (a['_id']['anno'] == b['_id']['anno']){
       if (a['_id']['aggregazione'] != null){
@@ -26,6 +68,7 @@ function formatClearance(data,title){
     }
     else return a['_id']['anno'] - b['_id']['anno']
   })
+  var hash = 0
   for (index in data){
        var doc = data[index]
        var category = doc['_id'].aggregazione
@@ -35,7 +78,11 @@ function formatClearance(data,title){
        var clearance = doc['clearance']
        categoryArray.push(category)
        clearanceArray.push(parseFloat(clearance.toPrecision(3)))
-       // color.push(dynamicColors())
+       // console.log(category)
+       hash = hashCode(category)
+       // console.log(hash)
+       // color.push(dynamicColors(hash+parseInt(doc['_id'].anno)))
+
     }
   var datasets=[
     {
