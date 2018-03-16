@@ -1,21 +1,22 @@
 var round =  require('mongo-round')
+var utils = require('../utils/utils')
+
 function formatDG(data,title){
   //category or "labels" array
   var categoryArray = []
 
   // values array
   var utArray = []
+  var color = []
+  var dynamicColors = function(num) {
 
-  // //TODO se ve bastaaante feo el randomcolor
-  // var color = [];
-  // var dynamicColors = function() {
-  //   var r = Math.floor(Math.random() * 255);
-  //   var g = Math.floor(Math.random() * 255);
-  //   var b = Math.floor(Math.random() * 255);
-  //   return "rgb(" + r + "," + g + "," + b + ")";
-  // };
-  // data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
-  // data.sort( function(a,b){return a['_id']['aggregazione'] - b['_id']['aggregazione']})
+    var r = Math.abs(num) % 251;
+    var g = Math.abs(num) % 254;
+    var b = Math.abs(num) % 253;
+    // console.log("r: " + r + " g: " + g + " b: " + b)
+    return "rgb(" + r + "," + g + "," + b + ")";
+  };
+
   data.sort((a,b)=>{
     if (a['_id']['anno'] == b['_id']['anno']){
       if (a['_id']['aggregazione'] != null){
@@ -35,14 +36,15 @@ function formatDG(data,title){
        var ut = doc['domandaGiustizia']
        categoryArray.push(category)
        utArray.push(parseFloat(ut.toPrecision(3)))
-       // color.push(dynamicColors())
+       hash = utils.hashCode(category)
+       color.push(dynamicColors(hash+parseInt(doc['_id'].anno)))
     }
   var datasets=[
     {
       'label':'Domanda di Giustizia ' + title,
-      // backgroundColor: color,
-      // borderColor: 'rgba(200, 200, 200, 0.75)',
-      // hoverBorderColor: 'rgba(200, 200, 200, 1)',
+      backgroundColor: color,
+      borderColor: 'rgba(200, 200, 200, 0.75)',
+      hoverBorderColor: 'rgba(200, 200, 200, 1)',
       'data':utArray
     }
   ]

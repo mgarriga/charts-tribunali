@@ -12,15 +12,15 @@ function formatUT(data,title){
   var rawNums = []
   var tabData = []
   var labels  = []
-  // //TODO se ve bastaaante feo el randomcolor
-  // var color = [];
-  // var dynamicColors = function() {
-  //   var r = Math.floor(Math.random() * 255);
-  //   var g = Math.floor(Math.random() * 255);
-  //   var b = Math.floor(Math.random() * 255);
-  //   return "rgb(" + r + "," + g + "," + b + ")";
-  // };
+  var color = []
+  var dynamicColors = function(num) {
 
+    var r = Math.abs(num) % 251;
+    var g = Math.abs(num) % 254;
+    var b = Math.abs(num) % 253;
+    // console.log("r: " + r + " g: " + g + " b: " + b)
+    return "rgb(" + r + "," + g + "," + b + ")";
+  };
   // data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
   data.sort((a,b)=>{
     if (a['_id']['anno'] == b['_id']['anno']){
@@ -42,15 +42,16 @@ function formatUT(data,title){
        categoryArray.push(category)
        // console.log(doc)
        utArray.push(parseFloat(ut.toPrecision(3)))
-
+       hash = utils.hashCode(category)
+       color.push(dynamicColors(hash+parseInt(doc['_id'].anno)))
 
   }
   var datasets=[
     {
       'label':'Ultra Triennale ' + title,
-      // backgroundColor: color,
-      // borderColor: 'rgba(200, 200, 200, 0.75)',
-      // hoverBorderColor: 'rgba(200, 200, 200, 1)',
+      backgroundColor: color,
+      borderColor: 'rgba(200, 200, 200, 0.75)',
+      hoverBorderColor: 'rgba(200, 200, 200, 1)',
       'data':utArray
     }
   ]
