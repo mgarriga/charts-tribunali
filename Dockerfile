@@ -1,4 +1,7 @@
+# FROM node:6
 FROM node:boron-alpine
+
+RUN apk add --update git 
 
 COPY package.json package.json
 

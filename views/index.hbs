@@ -1,32 +1,64 @@
-<html>
-  <head>
-    <title>Tribunali Italiani -- Demo</title>
-  </head>
-  <body bgcolor=white>
+<!doctype html>
+<html lang="en">
 
-    <table border="0" cellpadding="10">
-      <tr>
-        <td>
-          <img src="images/csm.jpeg">
-        </td>
-        <!-- <td>
-          <h1>Dati di Performance dei Tribunali Italiani -- Demo</h1>
-        </td> -->
-      </tr>
-      <tr>
-        <td>
-          <h1>Dati di Performance dei Tribunali Italiani -- Demo</h1>
-        </td>
-      </tr>
-    </table>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta charset="UTF-8">
+  <title>Tribunali Italiani -- Demo</title>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/custom.css">
+<link href="http://fonts.googleapis.com/css?family=Corben:bold|Nobile" rel="stylesheet" type="text/css">
+</head>
 
-    <p>Benvenuti a i report basati sui dati di performance dei tribunali Italiani.</p>
-    <p>I dati corrispondono al registro SIECIC (SICID sarà disponibile a breve). </p>
-    <p>Scegliere una opzione: </p>
-    <ul>
-      <li><a href="/tribunali-detail">Performance per Tribunale </a> (comparativa per area, dimensione, ecc.).
-      <li><a href="/charts">Performance Generale </a> (aggregazioni per area, dimensione, ecc.).
-    </ul>
+<body>
+  <!-- <div> -->
+    <div>
+      <nav class="navbar navbar-inverse" role="navigation" style="padding-left:130px;">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/">Home<span class="sr-only">(current)</span></a></li>
+          <li><a href="/tribunali-detail">Indicatori per Tribunale</a></li>
+          <li><a href="/charts">Indicatori Generali</a></li>
 
-  </body>
+        </ul>
+      </nav>
+    </div>
+    <br/>
+    <hr>
+
+    <div class="jumbotron">
+      <h1>Dati di Performance dei Tribunali Italiani</h1>
+      <p> Benvenuti a i report basati sui dati di performance dei tribunali Italiani.</p>
+      <p>I dati corrispondono al registro SIECIC (SICID sarà disponibile a breve). </p>
+      <!-- <a class="btn btn-large btn-success" href="/tribunali-detail">Tribunali</a>
+      <a class="btn btn-large btn-success" href="/charts">Generale</a> -->
+
+    </div>
+    <hr>
+    <div class="row-fluid marketing">
+        <div class="span6">
+          <h4>Performance per Tribunale</h4>
+          <p>Confronta ogni tribunale specifico contro la sua rispettiva area, dimensione, ecc.</p>
+          <a class="btn btn-large btn-success" href="/tribunali-detail">Tribunali</a>
+        </div>
+
+    </div>
+    <div class="row-fluid marketing">
+          <div class="span6">
+            <h4>Performance Generale</h4>
+            <p>Confronto di performance a livello generale, aggregata per area, dimensione, ecc. </p>
+            <a class="btn btn-large btn-success" href="/charts">Generale</a>
+          </div>
+
+    </div>
+  <!-- </div> -->
+  <script src="/scripts/jquery.backstretch.min.js"></script>
+  <!-- <script src="/scripts/script.js"></script> -->
+  <script>
+    $.backstretch("/images/tribunale.jpg")
+     // .css('z-index', 'inherit'); // this line is my solution!!
+  </script>
+</body>
+
 </html>
