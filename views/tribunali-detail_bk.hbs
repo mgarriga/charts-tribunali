@@ -1,0 +1,175 @@
+  <script src="http://code.jquery.com/jquery-2.1.4.min.js" charset="utf-8"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+
+<h1>Indicatori per Tribunale </h1>
+
+<div id="tribunali-location">
+  <script id="tribunali-fill" type="text/x-handlebars-template">
+    <div class="entry">
+      <!-- <h1>Tribunale</h1> -->
+      <label>Tribunale</label>
+      <select id="tribunali">
+        \{{#each tribunali}}
+          <option value= "\{{this}}">\{{this}}</option>
+        \{{/each }}
+      </select>
+
+    </div>
+  </script>
+
+</div>
+
+<p>
+  <label>Aggregazione</label>
+  <select id="aggregate">
+    <option value="tribunale">Tribunale</option>
+    <option value="area">Area</option>
+    <option value="dimensione" selected="selected">Dimensione</option>
+    <option value="distretto">Distretto di Corte d'Appello</option>
+    <option value="regione">Regione</option>
+    <option value="null">Totale</option>
+  </select>
+</p>
+
+<p>
+  <label>Indicatore</label>
+  <select id="indicator" onchange="changeHeader()">
+    <option value="clearanceRate"> Simple Clearance Rate</option>
+    <option value="clearanceRateFull" selected="selected"> Full Clearance Rate</option>
+    <option value="UTObiettivi"> Arretrato Ultra Triennale vs Obietivvi</option>
+    <option value="UTInterannuale"> Arretrato Ultra Triennale vs Anno Precedente </option>
+    <option value="UTSuPendenti"> Peso Ultra Triennale vs Totale Pendenti </option>
+    <option value="DomandaGiustizia"> Variazione Domanda di Giustizia </option>
+    <option value="UTDomanda"> Ultra Triennale vs Domanda di Giustizia </option>
+    <option value="DurataPrognostica"> Durata Prognostica in Giorni </option>
+    <option value="ProduttivitaMagistrato"> Produttività per Magistrato </option>
+    <option value="ProduttivitaControfattuale"> Produttività Controfattuale </option>
+  </select>
+</p>
+
+<div class="parent">
+    <label>Anni:  </label>
+    <!-- <label> <input type="checkbox" id='2013' label="2013" name="2013" /> 2013 </label>
+    <label> <input type="checkbox" id='2014' label="2014" name="2014" /> 2014 </label> -->
+    <label> <input type="checkbox" id='2015' label="2015" name="2015" /> 2015 </label>
+    <label> <input type="checkbox" id='2016' label="2016" name="2016" checked="checked"/> 2016 </label>
+</div>
+
+<p>
+  <label>Rappresentazione</label>
+  <select id="chartType">
+    <option value="bar" selected="selected"> Colonne </option>
+    <option value="line"> Linee </option>
+    <option value="pie"> Torta </option>
+    <option value="radar"> Radar </option>
+    <option value="polarArea"> Polar </option>
+  </select>
+</p>
+
+
+<p>
+  <input type="button" value="Show All!" onclick="fetchAll()"/>
+</p>
+
+<p>
+  <input type="button" value="Show Mean!" onclick="fetchData('Average',null)"/>
+</p>
+
+<p>
+  <input type="button" value="Show Median!" onclick="fetchData('Median',null)"/>
+</p>
+
+<p>
+  <input type="button" value="Show Mode!" onclick="fetchData('Mode',null)"/>
+</p>
+
+
+<h2 id="chartHeader">Full Clearance Rate</h2>
+
+<div id="table-locationAverage">
+  <script id="tabular-templateAverage" type="text/html">
+  <h2>Tabular Data</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <td>Aggregazioni</td>
+        \{{#each labels}} <td>\{{this}}</td> \{{/each }}
+      </tr>
+    </thead>
+    <tbody>
+      \{{#each datasets}}
+      <tr>
+        <td>\{{label}}</td>
+        \{{#each data}} <td>\{{this}}</td> \{{/each}}
+      </tr>
+      \{{/each}}
+    </tbody>
+  </table>
+  </script>
+</div>
+
+<div id="chart-locationAverage" class="container">
+    <canvas id="clearanceAverage"></canvas>
+</div>
+
+
+<!-- Next Metric -->
+
+<div id="table-locationMedian">
+  <script id="tabular-templateMedian" type="text/html">
+  <h2>Tabular Data</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <td>Aggregazioni</td>
+        \{{#each labels}} <td>\{{this}}</td> \{{/each }}
+      </tr>
+    </thead>
+    <tbody>
+      \{{#each datasets}}
+      <tr>
+        <td>\{{label}}</td>
+        \{{#each data}} <td>\{{this}}</td> \{{/each}}
+      </tr>
+      \{{/each}}
+    </tbody>
+  </table>
+  </script>
+</div>
+
+<div id="chart-locationMedian" class="container">
+  <!-- <h2 id="chartHeader">Simple Clearance Rate</h2> -->
+    <canvas id="clearanceMedian"></canvas>
+</div>
+
+<!-- Next Metric -->
+
+<div id="table-locationMode">
+  <script id="tabular-templateMode" type="text/html">
+  <h2>Tabular Data</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <td>Aggregazioni</td>
+        \{{#each labels}} <td>\{{this}}</td> \{{/each }}
+      </tr>
+    </thead>
+    <tbody>
+      \{{#each datasets}}
+      <tr>
+        <td>\{{label}}</td>
+        \{{#each data}} <td>\{{this}}</td> \{{/each}}
+      </tr>
+      \{{/each}}
+    </tbody>
+  </table>
+  </script>
+</div>
+
+<div id="chart-locationMode" class="container">
+  <!-- <h2 id="chartHeader">Simple Clearance Rate</h2> -->
+    <canvas id="clearanceMode"></canvas>
+</div>
+
+
+<script src='tribunali-detail-scripts.js'></script>

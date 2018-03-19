@@ -119,6 +119,8 @@ function drawChart(rawData, title, metric, typeChart){
     data: rawData['data'],
     options:rawData['options']
   })
+  chart.resize()
+
 }
 
 /*

@@ -138,5 +138,4 @@ function drawChart(rawData, title, metric, typeChart){
     options:rawData['options']
 
   })
-  chart.resize()
 }
