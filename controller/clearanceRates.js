@@ -237,6 +237,13 @@ function getClearanceAvg(criteria, years){
       $sort:{_id:1}
     }
   ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(data)
+  // })
   return result
 }
 

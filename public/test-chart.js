@@ -1,8 +1,8 @@
 //const Chart = require('charts.js')
 
 // var templateString = $('#tabular-template').html()
-// var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
- var host      = 'http://localhost:3000/'
+var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
+ // var host      = 'http://localhost:3000/'
 
 function changeHeader(){
   var optionSelected = $('#indicator option:selected').val();

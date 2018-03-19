@@ -1,8 +1,8 @@
 
 var templateTribunali = $('#tribunali-fill').html()
 
-// var host = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
- var host = 'http://localhost:3000/'
+var host = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
+ // var host = 'http://localhost:3000/'
 
 $(function(){
   $.ajax({
@@ -87,7 +87,6 @@ function fetchData(metric,callback){
   var indicatorText = $('#indicator option:selected').text();
   if (aggregate == 'null') aggregate = "totale"
   var type          = $("#chartType option:selected").val()
-
   var title = indicatorText + " " + metric + " for year(s) " + yearsArray.toString() + " -- aggregated by " + aggregate
 
   // var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'

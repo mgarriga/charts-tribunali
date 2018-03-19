@@ -10,6 +10,8 @@
 * tribunale
 * area
 * dimensione
+* __distretto__
+* __regione__
 * __anno__
 * pendenti (formato numerico?)
 * pendenti-ultra-triennali
@@ -39,13 +41,13 @@
 
 ## Deployment notes
 Tener cuidado con el puerto que se le asigna al container, porque está cableado a localhost:3000 en la vista y se rompe si es otro (configurar?)
-
-
+```
+$ mongoimport --host  --port  -d tribunali -u -p -c siecic --type csv --file import-siecic2013.csv --headerline
+```
 ## FEEDBACK
 
 3. il CSM ha chiesto di inserire sotto ogni rappresentazione degli indicatori anche i valori assoluti
 
 4.  inserire i 29 distretti di corte d'appello come modalità di aggregazione; si vedano i tribunali articolati per distretto in http://www.giustizia.bari.it/Informazioni_utili_2.aspx
-
 
 5. Infine chiedo se sia possibile migliorare il layout e inserire anche qualche altro tipo di rappresentazione grafica.
