@@ -1,0 +1,6 @@
+version: '3'
+services:
+  web:
+    image: mgarriga87/charts-tribunali:testing
+    ports:
+     - "3000:3000"
