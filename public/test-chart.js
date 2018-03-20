@@ -59,7 +59,7 @@ function fetchData(metric,callback){
       var templateString = templateStringAvg
   }
   var chartData;
-  var yearsArray = $('.parent input:checked').map(function () {
+  var yearsArray = $('.form-check input:checked').map(function () {
     return this.name;
   }).get();
 
