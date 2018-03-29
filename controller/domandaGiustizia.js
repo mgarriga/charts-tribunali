@@ -99,7 +99,9 @@ function getDomandaGiustiziaAvg(criteria, year){
           _id:{
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
           },
           iscrittiAct:{
             $push:{$cond:[{$eq:['$anno',year]},'$iscritti',false]}
@@ -137,6 +139,8 @@ function getDomandaGiustiziaAvg(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         domandaGiustizia:round({$multiply:['$domandaGiustizia',100]},0)
       }
     },
@@ -183,7 +187,9 @@ function getDomandaGiustiziaMedian(criteria, year){
           _id:{
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
           },
           iscrittiAct:{
             $push:{$cond:[{$eq:['$anno',year]},'$iscritti',false]}
@@ -221,6 +227,8 @@ function getDomandaGiustiziaMedian(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         domandaGiustizia:1
       }
     },
@@ -325,7 +333,9 @@ function getDomandaGiustiziaMode(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -365,6 +375,8 @@ function getDomandaGiustiziaMode(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         domandaGiustizia:1
       }
     },

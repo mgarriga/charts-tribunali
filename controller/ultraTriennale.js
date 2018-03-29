@@ -108,7 +108,9 @@ function getUTInterannualeAvg(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -144,16 +146,6 @@ function getUTInterannualeAvg(criteria, year){
         pendTotPre:{$arrayElemAt:['$pendTotPre',0]},
       }
     },
-    // {
-    //   $project:{
-    //     _id:1,
-    //     tpendUtAct: {$type:'$pendUtAct'},
-    //     tpendTotAct:{$type:'$pendTotAct'},
-    //     tpendUtPre: {$type:'$pendUtPre'},
-    //     tpendTotPre:{$type:'$pendTotPre'},
-    //     tsimpleClearance:{$type:'$simpleClearance'}
-    //   }
-    // }
     {
       $project:{
         _id:1,
@@ -171,6 +163,8 @@ function getUTInterannualeAvg(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         utInterannuale:{$divide:[{$subtract:['$pendUtActPerc',
                                              '$pendUtPrePerc']},
                                 '$pendUtPrePerc']}
@@ -219,7 +213,9 @@ function getUTInterannualeMedian(criteria, year){
           _id:{
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
           },
           pendUtAct:{
             $push:{$cond:[{$eq:['$anno',year]},'$pendenti-ultra-triennali',false]}
@@ -253,16 +249,6 @@ function getUTInterannualeMedian(criteria, year){
         pendTotPre:{$arrayElemAt:['$pendTotPre',0]},
       }
     },
-    // {
-    //   $project:{
-    //     _id:1,
-    //     tpendUtAct: {$type:'$pendUtAct'},
-    //     tpendTotAct:{$type:'$pendTotAct'},
-    //     tpendUtPre: {$type:'$pendUtPre'},
-    //     tpendTotPre:{$type:'$pendTotPre'},
-    //     tsimpleClearance:{$type:'$simpleClearance'}
-    //   }
-    // }
     {
       $project:{
         _id:1,
@@ -280,6 +266,8 @@ function getUTInterannualeMedian(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         utInterannuale:{$divide:[{$subtract:['$pendUtActPerc',
                                              '$pendUtPrePerc']},
                                 '$pendUtPrePerc']}
@@ -385,7 +373,9 @@ function getUTInterannualeMode(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -438,6 +428,8 @@ function getUTInterannualeMode(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         utInterannuale:{
           $divide:[{$subtract:['$pendUtActPerc',
                                '$pendUtPrePerc']},

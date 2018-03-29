@@ -323,7 +323,9 @@ function getFullClearanceAvg(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'anno':'$anno'
             //'aggregazione':criteria,
           },
@@ -358,6 +360,8 @@ function getFullClearanceAvg(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         fullClearance:{
           $divide:[{$arrayElemAt:["$definitiAct",0]},
                    {$sum:[{$arrayElemAt:["$pendentiPre",0]},
@@ -412,7 +416,9 @@ function getFullClearanceMedian(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -447,6 +453,8 @@ function getFullClearanceMedian(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         fullClearance:{
           $divide:[{$arrayElemAt:["$definitiAct",0]},
                    {$sum:[{$arrayElemAt:["$pendentiPre",0]},
@@ -556,7 +564,9 @@ function getFullClearanceMode(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione',
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -591,6 +601,8 @@ function getFullClearanceMode(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         fullClearance:{
           $divide:[{$arrayElemAt:["$definitiAct",0]},
                    {$sum:[{$arrayElemAt:["$pendentiPre",0]},
