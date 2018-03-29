@@ -1,8 +1,8 @@
 //const Chart = require('charts.js')
 
 // var templateString = $('#tabular-template').html()
-// var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
- var host      = 'http://localhost:3000/'
+var host      = 'http://charts-tribunali.westeurope.cloudapp.azure.com:3000/'
+ // var host      = 'http://localhost:3000/'
 
 function changeHeader(){
   var optionSelected = $('#indicator option:selected').val();
@@ -59,7 +59,7 @@ function fetchData(metric,callback){
       var templateString = templateStringAvg
   }
   var chartData;
-  var yearsArray = $('.parent input:checked').map(function () {
+  var yearsArray = $('.form-check input:checked').map(function () {
     return this.name;
   }).get();
 
@@ -119,6 +119,8 @@ function drawChart(rawData, title, metric, typeChart){
     data: rawData['data'],
     options:rawData['options']
   })
+  chart.resize()
+
 }
 
 /*

@@ -203,7 +203,6 @@ router.get("/clearanceRateFullMode", (req,res)=>{
 router.get("/clearanceRateByTribunaleAverage", (req,res)=>{
   var tribunale = req.query.tribunale
   var criteria  = req.query.criteria
-
   var years = req.query.years.map((year)=>{
     return parseInt(year)
   })

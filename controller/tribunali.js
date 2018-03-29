@@ -29,7 +29,9 @@ function getTribunaleDetail(tribunale){
           'tribunale':'$tribunale'
         },
         'area':{$first:'$area'},
-        'dimensione':{$first:'$dimensione'}
+        'dimensione':{$first:'$dimensione'},
+        'distretto':{$first:'$distretto'},
+        'regione':{$first:'$regione'}
       }
     }
   ])

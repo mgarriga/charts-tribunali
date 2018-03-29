@@ -75,7 +75,7 @@ function fetchData(metric,callback){
       var templateString = templateStringAvg
   }
   var chartData;
-  var yearsArray = $('.form-check input:checked').map(function () {
+  var yearsArray = $('.parent input:checked').map(function () {
     return this.name;
   }).get();
 
@@ -138,5 +138,4 @@ function drawChart(rawData, title, metric, typeChart){
     options:rawData['options']
 
   })
-  chart.resize()
 }

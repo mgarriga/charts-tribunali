@@ -1,4 +1,5 @@
 var round =  require('mongo-round')
+var utils = require('../utils/utils')
 
 
 //TODO formatClearance debería estar en la vista, no en el controller
@@ -8,15 +9,16 @@ function formatDP(data,title){
 
   // values array
   var dpArray = []
+  var color = []
+  var dynamicColors = function(num) {
 
-  // //TODO se ve bastaaante feo el randomcolor
-  // var color = [];
-  // var dynamicColors = function() {
-  //   var r = Math.floor(Math.random() * 255);
-  //   var g = Math.floor(Math.random() * 255);
-  //   var b = Math.floor(Math.random() * 255);
-  //   return "rgb(" + r + "," + g + "," + b + ")";
-  // };
+    var r = Math.abs(num) % 251;
+    var g = Math.abs(num) % 254;
+    var b = Math.abs(num) % 253;
+    // console.log("r: " + r + " g: " + g + " b: " + b)
+    return "rgb(" + r + "," + g + "," + b + ")";
+  };
+
   data.sort((a,b)=>{
     if (a['_id']['anno'] == b['_id']['anno']){
       if (a['_id']['aggregazione'] != null){
@@ -35,14 +37,15 @@ function formatDP(data,title){
        var dp = doc['durataPrognostica']
        categoryArray.push(category)
        dpArray.push(parseFloat(dp.toPrecision(3)))
-       // color.push(dynamicColors())
-    }
+       hash = utils.hashCode(category)
+       color.push(dynamicColors(hash+parseInt(doc['_id'].anno)))
+     }
   var datasets=[
     {
       'label':'Durata Prognostica ' + title,
-      // backgroundColor: color,
-      // borderColor: 'rgba(200, 200, 200, 0.75)',
-      // hoverBorderColor: 'rgba(200, 200, 200, 1)',
+      backgroundColor: color,
+      borderColor: 'rgba(200, 200, 200, 0.75)',
+      hoverBorderColor: 'rgba(200, 200, 200, 1)',
       'data':dpArray
     }
   ]

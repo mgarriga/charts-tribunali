@@ -1,0 +1,1 @@
+$.backstretch("/images/tribunale.jpg");

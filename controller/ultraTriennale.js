@@ -12,15 +12,15 @@ function formatUT(data,title){
   var rawNums = []
   var tabData = []
   var labels  = []
-  // //TODO se ve bastaaante feo el randomcolor
-  // var color = [];
-  // var dynamicColors = function() {
-  //   var r = Math.floor(Math.random() * 255);
-  //   var g = Math.floor(Math.random() * 255);
-  //   var b = Math.floor(Math.random() * 255);
-  //   return "rgb(" + r + "," + g + "," + b + ")";
-  // };
+  var color = []
+  var dynamicColors = function(num) {
 
+    var r = Math.abs(num) % 251;
+    var g = Math.abs(num) % 254;
+    var b = Math.abs(num) % 253;
+    // console.log("r: " + r + " g: " + g + " b: " + b)
+    return "rgb(" + r + "," + g + "," + b + ")";
+  };
   // data.sort( function(a,b){return a['_id']['anno'] - b['_id']['anno']})
   data.sort((a,b)=>{
     if (a['_id']['anno'] == b['_id']['anno']){
@@ -42,15 +42,16 @@ function formatUT(data,title){
        categoryArray.push(category)
        // console.log(doc)
        utArray.push(parseFloat(ut.toPrecision(3)))
-
+       hash = utils.hashCode(category)
+       color.push(dynamicColors(hash+parseInt(doc['_id'].anno)))
 
   }
   var datasets=[
     {
       'label':'Ultra Triennale ' + title,
-      // backgroundColor: color,
-      // borderColor: 'rgba(200, 200, 200, 0.75)',
-      // hoverBorderColor: 'rgba(200, 200, 200, 1)',
+      backgroundColor: color,
+      borderColor: 'rgba(200, 200, 200, 0.75)',
+      hoverBorderColor: 'rgba(200, 200, 200, 1)',
       'data':utArray
     }
   ]
@@ -107,7 +108,9 @@ function getUTInterannualeAvg(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -143,16 +146,6 @@ function getUTInterannualeAvg(criteria, year){
         pendTotPre:{$arrayElemAt:['$pendTotPre',0]},
       }
     },
-    // {
-    //   $project:{
-    //     _id:1,
-    //     tpendUtAct: {$type:'$pendUtAct'},
-    //     tpendTotAct:{$type:'$pendTotAct'},
-    //     tpendUtPre: {$type:'$pendUtPre'},
-    //     tpendTotPre:{$type:'$pendTotPre'},
-    //     tsimpleClearance:{$type:'$simpleClearance'}
-    //   }
-    // }
     {
       $project:{
         _id:1,
@@ -170,6 +163,8 @@ function getUTInterannualeAvg(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         utInterannuale:{$divide:[{$subtract:['$pendUtActPerc',
                                              '$pendUtPrePerc']},
                                 '$pendUtPrePerc']}
@@ -218,7 +213,9 @@ function getUTInterannualeMedian(criteria, year){
           _id:{
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
           },
           pendUtAct:{
             $push:{$cond:[{$eq:['$anno',year]},'$pendenti-ultra-triennali',false]}
@@ -252,16 +249,6 @@ function getUTInterannualeMedian(criteria, year){
         pendTotPre:{$arrayElemAt:['$pendTotPre',0]},
       }
     },
-    // {
-    //   $project:{
-    //     _id:1,
-    //     tpendUtAct: {$type:'$pendUtAct'},
-    //     tpendTotAct:{$type:'$pendTotAct'},
-    //     tpendUtPre: {$type:'$pendUtPre'},
-    //     tpendTotPre:{$type:'$pendTotPre'},
-    //     tsimpleClearance:{$type:'$simpleClearance'}
-    //   }
-    // }
     {
       $project:{
         _id:1,
@@ -279,6 +266,8 @@ function getUTInterannualeMedian(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         utInterannuale:{$divide:[{$subtract:['$pendUtActPerc',
                                              '$pendUtPrePerc']},
                                 '$pendUtPrePerc']}
@@ -384,7 +373,9 @@ function getUTInterannualeMode(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -437,6 +428,8 @@ function getUTInterannualeMode(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         utInterannuale:{
           $divide:[{$subtract:['$pendUtActPerc',
                                '$pendUtPrePerc']},

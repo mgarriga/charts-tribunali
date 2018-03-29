@@ -1,15 +1,6 @@
 var round =  require('mongo-round')
+var utils = require('../utils/utils')
 
-function hashCode(str){
-    var hash = 0;
-    if (str.length == 0) return hash;
-    for (i = 0; i < str.length; i++) {
-        char = str.charCodeAt(i);
-        hash = ((hash<<5)-hash)+char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
-}
 //TODO formatClearance debería estar en la vista, no en el controller
 function formatClearance(data,title){
   //category or "labels" array
@@ -53,7 +44,7 @@ function formatClearance(data,title){
     // return "rgb"+colors[index]
 
 
-    var r = Math.abs(num) % 255;
+    var r = Math.abs(num) % 251;
     var g = Math.abs(num) % 254;
     var b = Math.abs(num) % 253;
     // console.log("r: " + r + " g: " + g + " b: " + b)
@@ -79,17 +70,17 @@ function formatClearance(data,title){
        categoryArray.push(category)
        clearanceArray.push(parseFloat(clearance.toPrecision(3)))
        // console.log(category)
-       hash = hashCode(category)
+       hash = utils.hashCode(category)
        // console.log(hash)
-       // color.push(dynamicColors(hash+parseInt(doc['_id'].anno)))
+       color.push(dynamicColors(hash+parseInt(doc['_id'].anno)))
 
     }
   var datasets=[
     {
       'label':'Clearance ' + title,
-      // backgroundColor: color,
-      // borderColor: 'rgba(200, 200, 200, 0.75)',
-      // hoverBorderColor: 'rgba(200, 200, 200, 1)',
+      backgroundColor: color,
+      borderColor: 'rgba(200, 200, 200, 0.75)',
+      hoverBorderColor: 'rgba(200, 200, 200, 1)',
       'data':clearanceArray
     }
   ]
@@ -246,6 +237,13 @@ function getClearanceAvg(criteria, years){
       $sort:{_id:1}
     }
   ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(data)
+  // })
   return result
 }
 
@@ -325,7 +323,9 @@ function getFullClearanceAvg(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'anno':'$anno'
             //'aggregazione':criteria,
           },
@@ -360,6 +360,8 @@ function getFullClearanceAvg(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         fullClearance:{
           $divide:[{$arrayElemAt:["$definitiAct",0]},
                    {$sum:[{$arrayElemAt:["$pendentiPre",0]},
@@ -414,7 +416,9 @@ function getFullClearanceMedian(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione'
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -449,6 +453,8 @@ function getFullClearanceMedian(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         fullClearance:{
           $divide:[{$arrayElemAt:["$definitiAct",0]},
                    {$sum:[{$arrayElemAt:["$pendentiPre",0]},
@@ -558,7 +564,9 @@ function getFullClearanceMode(criteria, year){
             // we should keep dimension and area as well, to then group by any of them
             'tribunale':'$tribunale',
             'dimensione':'$dimensione',
-            'area':'$area'
+            'area':'$area',
+            'distretto':'$distretto',
+            'regione':'$regione',
             //'aggregazione':criteria,
             //'anno':'$anno'
           },
@@ -593,6 +601,8 @@ function getFullClearanceMode(criteria, year){
         'tribunale':'$_id.tribunale',
         'dimensione':'$_id.dimensione',
         'area':'$_id.area',
+        'distretto':'$_id.distretto',
+        'regione':'$_id.regione',
         fullClearance:{
           $divide:[{$arrayElemAt:["$definitiAct",0]},
                    {$sum:[{$arrayElemAt:["$pendentiPre",0]},
