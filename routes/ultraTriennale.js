@@ -83,8 +83,11 @@ router.get("/UTObiettiviByTribunaleAverage", (req,res)=>{
       results.push(result2)
       ut.getPendentiUTByTribunale('Average', tribunale,criteria,years,function(result3){
         results.push(result3)
-        utils.joinResults(results,function(result){
-          res.json(result)
+        ut.getObiettiviByTribunale('Average',tribunale,criteria,years,(result4)=>{
+          results.push(result4)
+          utils.joinResults(results,function(result){
+            res.json(result)
+          })
         })
       })
     })
@@ -100,7 +103,7 @@ router.get("/UTObiettiviByTribunaleMedian", (req,res)=>{
     return parseInt(year)
   })
   results = []
-  var result1,result2,result3,result4 = null
+  var result1,result2,result3,result4,result5 = null
   getUTSuPendentiByTribunale('Median', tribunale,criteria,years,function(result1){
       results.push(result1)
     getUTObiettiviByTribunale('Median',tribunale, criteria,years,function(result2){
@@ -109,8 +112,11 @@ router.get("/UTObiettiviByTribunaleMedian", (req,res)=>{
         results.push(result3)
         ut.getPendentiByTribunale('Median',tribunale,criteria,years,function(result4){
           results.push(result4)
-          utils.joinResults(results, function(result){
-            res.json(result)
+          ut.getObiettiviByTribunale('Median',tribunale,criteria,years,(result5)=>{
+            results.push(result5)
+            utils.joinResults(results, function(result){
+              res.json(result)
+            })
           })
         })
       })
@@ -314,15 +320,18 @@ router.get("/UTObiettiviAverage", (req,res)=>{
     return parseInt(year)
   })
   var results = []
-  var result1, result2, result3 = null
+  var result1, result2, result3, result4 = null
   getUTSuPendenti('Average',criteria,years,function(result1){
     results.push(result1)
     getUTObiettivi('Average',criteria,years,function(result2){
       results.push(result2)
       ut.getPendentiUT('Average',criteria,years,function(result3){
         results.push(result3)
-        utils.joinResults(results,function(result){
-          res.json(result)
+        ut.getObiettivi('Average',criteria,years,(result4)=>{
+          results.push(result4)
+          utils.joinResults(results,function(result){
+            res.json(result)
+          })
         })
       })
     })
@@ -338,7 +347,7 @@ router.get("/UTObiettiviMedian", (req,res)=>{
     return parseInt(year)
   })
   var results = []
-  var result1, result2, result3, result4 = null
+  var result1, result2, result3, result4,result5 = null
   getUTSuPendenti('Median',criteria,years,function(result1){
       results.push(result1)
     getUTObiettivi('Median',criteria,years,function(result2){
@@ -347,8 +356,11 @@ router.get("/UTObiettiviMedian", (req,res)=>{
         results.push(result3)
         ut.getPendenti('Median',criteria,years,function(result4){
           results.push(result4)
-          utils.joinResults(results,function(result){
-            res.json(result)
+          ut.getObiettivi('Median',criteria,years,(result5)=>{
+            results.push(result5)
+            utils.joinResults(results,function(result){
+              res.json(result)
+            })
           })
         })
       })
@@ -653,6 +665,7 @@ function getUTObiettiviByTribunale(metric, tribunale,criteria,years,callback){
         return
       }
       for (index in data){
+        // console.log(data[index])
         var doc = data[index]
         if (doc['_id'].aggregazione == tribunale){
           partial.push(doc)

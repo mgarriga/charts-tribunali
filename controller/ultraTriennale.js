@@ -915,6 +915,179 @@ function getPendentiUTMedian(criteria, years, res){
   return result
 }
 
+function getObiettiviAvg(criteria, years){
+  result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years}
+      }
+    },
+    {
+      $group:{
+          _id:{
+            'aggregazione':criteria,
+            'anno':'$anno'
+          },
+          rawNumbers:{$push:{'obiettivo':'$obiettivo-ultra-triennali'}},
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "obiettivo": {
+            "$divide": [
+                { // expression returns total
+                    "$reduce": {
+                        "input": "$rawNumbers",
+                        "initialValue": 0,
+                        "in": { "$add": ["$$value", "$$this.obiettivo"] }
+                    }
+                },
+                { // expression returns ratings count
+                    "$cond": [
+                        { "$ne": [ { "$size": "$rawNumbers" }, 0 ] },
+                        { "$size": "$rawNumbers" },
+                        1
+                    ]
+                }
+            ]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        // ultraTriennale:"",
+        rawNumbers:[
+          // {'label':'Pendenti UT','data':round('$pendentiUltraTriennali',0)},
+          {'label':'Obiettivo a Smaltire','data':   round('$obiettivo',0)},
+        ]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  return result
+}
+
+function getObiettiviMedian(criteria, years, res){
+  var result = db.collection("siecic").aggregate([
+    {
+      $match:{
+        'anno':{$in:years},
+      }
+    },
+    {
+      $group:{
+        _id:{
+          'aggregazione':criteria,
+          'anno':'$anno'
+        },
+        count:{
+          $sum:1
+        },
+        obiettivo:{
+          $push:"$obiettivo-ultra-triennali"
+        },
+      }
+    },
+    {
+      "$unwind":"$obiettivo"
+    },
+    {
+      "$sort":{
+        obiettivo:1
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "obiettivo":1,
+        "midpoint":{
+          $divide:["$count",2]
+        }
+      }
+    },
+    {
+      $project:{
+        "_id":1,
+        "count":1,
+        "obiettivo":1,
+        "midpoint":1,
+        "high":{
+          $ceil:"$midpoint"
+        },
+        "low":{
+          $floor: "$midpoint"
+        }
+      }
+    },
+    {
+      $group:{
+        _id:"$_id",
+        obiettivo:{
+          $push:"$obiettivo"
+        },
+        high: {
+          $avg: "$high"
+        },
+        low: {
+          $avg: "$low"
+        }
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        "beginValue":{
+          "$arrayElemAt":["$obiettivo","$high"]
+        },
+        "endValue":{
+          "$arrayElemAt":["$obiettivo","$low"]
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        obiettivo:{
+          $avg:["$beginValue","$endValue"]
+        }
+      }
+    },
+    {
+      $group:{
+        _id:'$_id',
+        obiettivo:{
+          $avg:"$obiettivo"
+        },
+      }
+    },
+    {
+      $project:{
+        _id:1,
+        rawNumbers:[
+          {'label':'Obiettivo a Smaltire','data':round('$obiettivo',0)},
+        ]
+      }
+    },
+    {
+      $sort:{_id:1}
+    }
+  ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(JSON.stringify(data))
+  // })
+  return result
+}
+
+
 function getPendentiAvg(criteria, years){
   result = db.collection("siecic").aggregate([
     {
@@ -970,6 +1143,7 @@ function getPendentiAvg(criteria, years){
   ])
   return result
 }
+
 
 function getPendentiMedian(criteria, years, res){
   var result = db.collection("siecic").aggregate([
@@ -1090,7 +1264,6 @@ function getPendentiMedian(criteria, years, res){
 module.exports.getPendentiUTMedian = getPendentiUTMedian
 module.exports.getPendentiMedian   = getPendentiMedian
 
-
 function getUTObiettiviAvg(criteria, years, res){
 
   result = db.collection("siecic").aggregate([
@@ -1105,7 +1278,11 @@ function getUTObiettiviAvg(criteria, years, res){
             'aggregazione':criteria,
             'anno':'$anno'
           },
-          ultraTriennale:{$avg:'$obiettivo-ultra-triennali'}
+          // ultraTriennale:{$avg:'$obiettivo-ultra-triennali'}
+          ultraTriennale:{$avg:{$divide:[{
+            $subtract:['$pendenti-ultra-triennali','$obiettivo-ultra-triennali']},
+            '$pendenti']
+          }}
       }
     },
     {
@@ -1118,8 +1295,16 @@ function getUTObiettiviAvg(criteria, years, res){
       $sort:{_id:1}
     }
   ])
+  // .toArray(function(err,data){
+  //   if (err) {
+  //     console.log(err)
+  //     return
+  //   }
+  //   console.log(data)
+  // })
   return result
 }
+
 
 function getUTObiettiviMedian(criteria, years, res){
   var result = db.collection("siecic").aggregate([
@@ -1138,7 +1323,13 @@ function getUTObiettiviMedian(criteria, years, res){
           $sum:1
         },
         ultraTriennale:{
-          $push:'$obiettivo-ultra-triennali'
+          //$push:'$obiettivo-ultra-triennali'
+          $push:{
+            $avg:{$divide:[{
+              $subtract:['$pendenti-ultra-triennali','$obiettivo-ultra-triennali']},
+              '$pendenti']
+            }
+          }
         }
       }
     },
@@ -1234,7 +1425,12 @@ function getUTObiettiviMode(criteria, years, res){
         _id:{
           'agg':criteria,
           'ann':'$anno',
-          ut:'$obiettivo-ultra-triennali',
+          ut:{$avg:{$divide:[{
+              $subtract:['$pendenti-ultra-triennali','$obiettivo-ultra-triennali']},
+              '$pendenti']
+            }
+          }
+          //ut:'$obiettivo-ultra-triennali',
         },
         count:{
             $sum: 1
@@ -1646,6 +1842,104 @@ function getPendentiUTByTribunale(metric,tribunale,criteria,years,callback){
   })
 }
 
+function getObiettiviByTribunale(metric,tribunale,criteria,years,callback){
+  partial = []
+  title = ""
+  switch(metric) {
+      case 'Average':
+          funct     = getObiettiviAvg
+          title     = 'Media'
+          break;
+      case 'Median':
+          funct     = getObiettiviMedian
+          title     = 'Mediana'
+          break;
+      case 'Mode':
+          funct     = getObiettiviAvg
+          title     = 'Moda'
+          break;
+      default:
+          funct     = getObiettiviAvg
+          title     = 'Media'
+  }
+  // funct('$'+criteria,years).toArray(function (err, data){
+  funct('$tribunale',years).toArray(function (err, data){
+    if (err) {
+      console.log(err)
+      return
+    }
+    for (index in data){
+      var doc = data[index]
+      if (doc['_id'].aggregazione == tribunale){
+        partial.push(doc)
+      }
+    }
+  //    var result = cr.formatClearance(data,"Average")
+    var filter
+    tr.getTribunaleDetail(tribunale).toArray(function(err,data){
+      if (err) {
+        console.log(err)
+        return
+      }
+      for (index in data){
+        filter = data[index]
+      }
+      funct('$'+criteria,years).toArray(function (err, data){
+        if (err) {
+          console.log(err)
+          return
+        }
+        for (index in data){
+          if (data[index]['_id'].aggregazione == filter[criteria]) partial.push(data[index])
+        }
+        // console.log(JSON.stringify(partial))
+        // TODO Continuar Acá: cómo mostrar la data de RawResults en la tabla?
+        res = utils.formatTable(partial,"Obiettivo a Smaltire " + title)
+        callback(res)
+      })
+      //getClearanceRates(res)
+    })
+  })
+}
+
+function getObiettivi(metric,criteria,years,callback){
+  var partial = []
+  var title = ""
+  switch(metric) {
+      case 'Average':
+          funct   = getObiettiviAvg
+          title   = 'Media'
+          break;
+      case 'Median':
+          funct   = getObiettiviMedian
+          title   = 'Mediana'
+          break;
+      case 'Mode':
+          funct   = getObiettiviAvg
+          title   = 'Moda'
+          break;
+      default:
+          funct   = getObiettiviAvg
+          title   = 'Media'
+  }
+  funct('$'+criteria,years).toArray(function (err, data){
+    if (err) {
+      console.log(err)
+      return
+    }
+    for (index in data){
+      partial.push(data[index])
+    }
+    res = utils.formatTable(partial,"Obiettivo a Smaltire " + title)
+    callback(res)
+  })
+}
+
+
+module.exports.getObiettiviByTribunale = getObiettiviByTribunale
+module.exports.getObiettivi            = getObiettivi
+
+
 function getPendentiByTribunale(metric,tribunale,criteria,years,callback){
   partial = []
   title = ""
@@ -1698,7 +1992,7 @@ function getPendentiByTribunale(metric,tribunale,criteria,years,callback){
         }
         // console.log(JSON.stringify(partial))
         // TODO Continuar Acá: cómo mostrar la data de RawResults en la tabla?
-        res = utils.formatTable(partial,"PENDENTI " + title)
+        res = utils.formatTable(partial,"Pendenti " + title)
         callback(res)
       })
       //getClearanceRates(res)
