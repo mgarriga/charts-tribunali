@@ -13,4 +13,10 @@ For your first PR do the following:
 Name: Gabriel
 Location: Neuquen, Argentina
 Experience Level: 0%
-----------------------------------------
+--------------------------------------------------------------------------------
+name: Lucas Adrián Pérez
+location: Cinco Saltos - Rio Negro - Argentina
+experience level: 57% -> Loading...
+recommended fix: views made with material.
+--------------------------------------------------------------------------------
+
